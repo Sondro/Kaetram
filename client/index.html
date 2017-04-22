@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta property="og:title" content="Kaetram">
+    <meta property="og:type" content="game">
+    <meta property="og:url" content="https://kaetram.com">
+    <meta property="og:site_name" content="Kaetram">
+    <meta property="og:description" content="The ultimate HTML5 experience!">
+
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/vars.css">
+
+    <title>Kaetram</title>
+</head>
+<body class="intro">
+
+    <noscript>
+
+        <div class="alert">
+            You must enable JavaScript to play Kaetram.
+        </div>
+
+    </noscript>
+
+    <div id="intro">
+
+        <!-- <h1 id="logo"></h1> -->
+
+        <section id="parchment" class="loadCharacter">
+
+            <div class="parchment-left"></div>
+            <div class="parchment-middle"></div>
+            <div class="parchment-right"></div>
+
+            <article id="loadCharacter">
+                <h1>
+                    <span class="left-ornament"></span>
+                    Kaetram
+                    <span class="right-ornament"></span>
+                </h1>
+
+                <form method="get" accept-charset="utf-8">
+                    <input type="text" id="loginNameInput" class="stroke" name="player-name" placeholder="Username" maxlength="32" autofocus>
+                    <input type="password" id="loginPasswordInput" class="stroke" name="player-password" placeholder="Password" maxlength="64">
+                </form>
+
+                <div class="login">
+                    <span class="link">Login</span>
+                    <img src="img/spinner.gif">
+                </div>
+
+                <div class="createNew">
+                    <span class="link">New Character</span>
+                </div>
+
+
+                <div class="validation-summary"></div>
+
+            </article>
+
+            <article id="createCharacter">
+                <h1>
+                    <span class="left-ornament"></span>
+                    New Character
+                    <span class="right-ornament"></span>
+                </h1>
+
+
+                <form method="get" accept-charset="utf-8">
+                    <input type="text" id="registerNameInput" class="stroke" name="player-name" placeholder="Username" maxlength="32">
+                    <input type="password" id="registerPasswordInput" class="stroke" name="player-password" placeholder="Password" maxlength="64">
+                    <input type="password" id="registerPasswordConfirmationInput" class="stroke" name="player-password2" placeholder="Confirm Password" maxlength="64">
+                    <input type="email" id="registerEmailInput" class="stroke" name="player-email" placeholder="Email Address" maxlength="64">
+                </form>
+
+                <div class="login">
+                    <span class="link">Create</span>
+                </div>
+
+                <p></p>
+
+                <div class="cancel">
+                    <span class="link">Cancel</span>
+                </div>
+
+                <div class="validation-summary"></div>
+
+            </article>
+
+            <article id="credits">
+
+            </article>
+
+            <article id="about">
+                <h1>
+                    <span class="left-ornament"></span>
+
+                    <span class="title">
+                        About
+                    </span>
+
+                    <span class="right-ornament"></span>
+                </h1>
+
+                <p id="description">
+                    Kaetram is a 2D HTML5 multiplayer experience available in the comfort of your browser.
+                </p>
+
+                <div class="right">
+                    <div class="img"></div>
+                    <p>
+                        It is fully compatible with modern-day browsers and seeks to
+                        expand towards offering support on older ones too!
+                    </p>
+                </div>
+
+                <div id="close-about">
+                    <span>-- Click anywhere to close --</span>
+                </div>
+
+            </article>
+
+            <article id="git">
+                Structure this later
+            </article>
+
+            <article id="death">
+                <p>You have died...</p>
+                <div id="respawn" class="button"></div>
+            </article>
+
+        </section>
+
+    </div>
+
+    <div id="container">
+
+        <div id="border">
+            <div id="canvas">
+                <canvas id="background"></canvas>
+                <canvas id="entities"></canvas>
+                <canvas id="foreground"></canvas>
+                <canvas id="textCanvas"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <div id="about-link" class="clickable">
+            <span id="toggle-about">About</span>
+        </div>
+
+        <div id="credits-link" class="clickable">
+            <span class="dash">&ndash;</span>
+            <span id="toggle-credits">Credits</span>
+        </div>
+
+        <div id="git-link" class="clickable">
+            <span class="dash">&ndash;</span>
+            <span id="toggle-git">GitHub</span>
+        </div>
+
+        <div id="forums-link" class="clickable">
+            <span class="dash">&ndash;</span>
+            <a class="clickable" target="_blank" href="https://forum.taptapadventure.com">Forums</a>
+        </div>
+
+    </footer>
+
+    <div id="resizeCheck"></div>
+
+    <script src="js/utils/detect.js" type="text/javascript"></script>
+    <script src="js/lib/log.js"></script>
+
+    <script>
+        var require = { waitSeconds: 60 };
+    </script>
+
+    <script src="lib/socket.io.js"></script>
+    <script src="js/lib/jquery.js"></script>
+    <script data-main="js/lib/home" src="js/lib/require.js"></script>
+
+</body>
+</html>

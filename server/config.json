@@ -1,0 +1,19 @@
+{
+  "name": "Kaetram",
+  "host": "0.0.0.0",
+  "port": 1800,
+
+  "mysqlHost": "144.217.92.76",
+  "mysqlPort": 3306,
+  "mysqlUser": "flavius",
+  "mysqlPassword": "Demise255",
+
+  "debugLevel": "info",
+  "localDebug": false,
+  "worlds": 1,
+  "maxPlayers": 200,
+  "gver": 1,
+  "updateTime": 50,
+
+  "forceCollisions": false
+}
