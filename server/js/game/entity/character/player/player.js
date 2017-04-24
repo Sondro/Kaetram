@@ -1,3 +1,5 @@
+/* global module */
+
 var Character = require('../character');
 
 module.exports = Player = Character.extend({
@@ -10,6 +12,7 @@ module.exports = Player = Character.extend({
         self.connection = connection;
 
         self.id = self.connection.id;
+
     }
 
 });

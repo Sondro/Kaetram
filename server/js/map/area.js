@@ -1,6 +1,14 @@
+/* global module */
+
 var cls = require('../lib/class');
 
 module.exports = Area = cls.Class.extend({
+
+    /**
+     * This is an abstract file for Area,
+     * it encompasses the dimensions and all
+     * entities in it.
+     */
 
     init: function(id, x, y, width, height) {
         var self = this;
@@ -48,4 +56,5 @@ module.exports = Area = cls.Class.extend({
     onEmpty: function(callback) {
         this.emptyCallback = callback;
     }
+
 });

@@ -1,3 +1,5 @@
+/* global module */
+
 var Utils = {};
 
 module.exports = Utils;

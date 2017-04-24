@@ -1,9 +1,15 @@
+/* global module */
+
 var cls = require('../lib/class'),
     map = require('../../data/map/world_server.json'),
     Utils = require('../util/utils'),
     fs = require('fs'),
     _ = require('underscore'),
-    config = require('../../config.json');
+    config = require('../../config.json'),
+    Groups = require('./groups'),
+    Modules = require('../util/modules'),
+    PVPAreas = require('./areas/pvpareas'),
+    MusicAreas = require('./areas/musicareas');
 
 module.exports = Map = cls.Class.extend({
 
@@ -14,6 +20,7 @@ module.exports = Map = cls.Class.extend({
         self.ready = false;
 
         self.load();
+        self.groups = new Groups(self);
     },
 
     load: function() {
@@ -36,13 +43,9 @@ module.exports = Map = cls.Class.extend({
 
         self.areas = {};
 
-        self.pvpAreas = [];
-        self.pvpGameAreas = [];
-        self.healingAreas = [];
-        self.waitingAreas = [];
-
         self.loadAreas();
         self.loadCollisions();
+        self.loadDoors();
 
         self.ready = true;
     },
@@ -50,7 +53,63 @@ module.exports = Map = cls.Class.extend({
     loadAreas: function() {
         var self = this;
 
+        /**
+         * The structure for the new self.areas is as follows:
+         *
+         * self.areas = {
+         *      pvpAreas = {
+         *          allPvpAreas
+         *      }
+         *
+         *      musicAreas = {
+         *          allMusicAreas
+         *      }
+         *
+         *      etc...
+         * }
+         */
 
+        self.areas['PVP'] = new PVPAreas();
+        self.areas['Music'] = new MusicAreas();
+    },
+
+    loadDoors: function() {
+        var self = this;
+
+        self.doors = {};
+
+        _.each(map.doors, function(door) {
+            var orientation;
+
+            switch (door.to) {
+                case 'u':
+                    orientation = Modules.Orientation.Up;
+                    break;
+
+                case 'd':
+                    orientation = Modules.Orientation.Down;
+                    break;
+
+                case 'l':
+                    orientation = Modules.Orientation.Left;
+                    break;
+
+                case 'r':
+                    orientation = Modules.Orientation.Right;
+                    break;
+            }
+
+            self.doors[self.gridPositionToIndex(door.x, door.y)] = {
+                x: door.tx,
+                y: door.ty,
+                orientation: orientation,
+                portal: door.p === 1,
+                level: door.l,
+                achievement: door.a,
+                rank: door.r
+            }
+
+        });
     },
 
     loadCollisions: function() {
@@ -102,7 +161,45 @@ module.exports = Map = cls.Class.extend({
     },
 
     isValidPosition: function(x, y) {
+        return isInt(x) && isInt(y) && !this.isOutOfBounds(x, y) && !this.isColliding(x, y);
+    },
 
+    isOutOfBounds: function(x, y) {
+          return x < 0 || x >= this.width || y < 0 || y >= this.height;
+    },
+
+    isColliding: function(x, y) {
+        var self = this;
+
+        if (self.isOutOfBounds(x, y))
+            return false;
+
+        return self.grid[y][x] === 1;
+    },
+
+    indexToGridPosition: function(tileIndex) {
+        var self = this;
+
+        tileIndex -= 1;
+
+        var x = self.getX(tileIndex + 1, self.width),
+            y = Math.floor(tileIndex / self.width);
+
+        return {
+            x: x,
+            y: y
+        }
+    },
+
+    gridPositionToIndex: function(x, y) {
+          return (y * this.width) + x + 1;
+    },
+
+    getX: function(index, width) {
+        if (index === 0)
+            return 0;
+
+        return (index % width === 0) ? width - 1 : (index % width) - 1;
     },
 
     getRandomPosition: function(area) {

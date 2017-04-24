@@ -1,3 +1,5 @@
+/* global module */
+
 var Entity = require('../entity');
 
 module.exports = Character = Entity.extend({

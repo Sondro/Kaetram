@@ -1,3 +1,5 @@
+/* global module */
+
 var Socket = require('./socket'),
     Connection = require('./connection'),
     connect = require('connect'),
@@ -27,17 +29,17 @@ WebSocket.Server = Socket.extend({
         app.use(serve('client', {'index': ['index.html']}), null);
 
         self.httpServer = http.createServer(app).listen(port, host, function serverEverythingListening() {
-            log.info('Server is now listening on: ' + port);
+            log.notice('Server is now listening on: ' + port);
         });
 
         self.io = new SocketIO(self.httpServer);
         self.io.on('connection', function webSocketListener(socket) {
-            log.info('Received connection from: ' + socket._remoteAddress);
+            log.notice('Received connection from: ' + socket._remoteAddress);
 
             var client = new WebSocket.Connection(self.createId(), socket, self);
 
             socket.on('client', function(gVer, cType) {
-                log.info('Received Version: ' + gVer + ' type: ' + cType);
+                log.notice('Received Version: ' + gVer + ' type: ' + cType);
 
                 if (gVer !== self.version) {
                     client.sendUTF8('updated');
@@ -92,7 +94,7 @@ WebSocket.Connection = Connection.extend({
         });
 
         self._connection.on('disconnect', function() {
-            log.info('Closed socket: ' + self._connection._remoteAddress);
+            log.notice('Closed socket: ' + self._connection._remoteAddress);
 
             if (self.closeCallback)
                 self.closeCallback();

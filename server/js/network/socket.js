@@ -1,3 +1,5 @@
+/* global module */
+
 var cls = require('../lib/class'),
     _ = require('underscore');
 

@@ -5,13 +5,14 @@ var fs = require('fs'),
     MySQL = require('./database/mysql'),
     WebSocket = require('./network/websocket'),
     Utils = require('./util/utils'),
+    _ = require('underscore'),
     allowConnections = false;
 
-log = new Log(config.debugLevel, config.localDebug ? fs.createWriteStream('runtime.log') : null);
+log = new Log(config.worlds > 1 ? 'notice' : config.debugLevel, config.localDebug ? fs.createWriteStream('runtime.log') : null);
 
 function Main() {
 
-    log.info('Initializing ' + config.name + ' game engine...');
+    log.notice('Initializing ' + config.name + ' game engine...');
 
     var worlds = [],
         webSocket = new WebSocket.Server(config.host, config.port),
@@ -45,7 +46,7 @@ function Main() {
     });
 
     webSocket.onError(function() {
-        log.info('The Web Socket has encountered an error.');
+        log.notice('The Web Socket has encountered an error.');
     });
 
     /**
@@ -59,8 +60,17 @@ function Main() {
 
         allowConnections = true;
 
-        log.info('Finished parsing ' + worlds.length + ' world' + (worlds.length > 1 ? 's' : '') + '!');
-    }, 400);
+        log.notice('Finished creating ' + worlds.length + ' world' + (worlds.length > 1 ? 's' : '') + '!');
+
+        initializeWorlds(worlds);
+    }, 200);
+
+}
+
+function initializeWorlds(worlds) {
+    for (var worldId in worlds)
+        if (worlds.hasOwnProperty(worldId))
+            worlds[worldId].load();
 }
 
 function getPopulations(worlds) {
