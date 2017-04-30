@@ -57,9 +57,10 @@ define(['jquery', './app', './game'], function($, App, Game) {
 
     var initGame = function() {
 
-        game = new Game(app);
-
-        app.setGame(game);
+        app.onReady(function() {
+            game = new Game(app);
+            app.setGame(game);
+        });
 
     };
 

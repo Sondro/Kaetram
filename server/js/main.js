@@ -15,12 +15,12 @@ function Main() {
     log.notice('Initializing ' + config.name + ' game engine...');
 
     var worlds = [],
-        webSocket = new WebSocket.Server(config.host, config.port),
+        webSocket = new WebSocket.Server(config.host, config.port, config.gver),
         database = new MySQL(config.mysqlHost, config.mysqlPort, config.mysqlUser, config.mysqlPassword);
 
     webSocket.onConnect(function(connection) {
         if (!allowConnections) {
-            connection.sendUTF8('errorconnecting');
+            connection.sendUTF8('disallowed');
             connection.close();
         }
 
@@ -36,6 +36,8 @@ function Main() {
         if (world)
             world.playerConnectCallback(connection);
         else {
+            log.info('Worlds are currently full, closing...');
+
             connection.sendUTF8('full');
             connection.close();
         }
@@ -46,7 +48,7 @@ function Main() {
     });
 
     webSocket.onError(function() {
-        log.notice('The Web Socket has encountered an error.');
+        log.notice('Web Socket has encountered an error.');
     });
 
     /**

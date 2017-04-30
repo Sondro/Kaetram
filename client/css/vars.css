@@ -111,6 +111,17 @@ body {
     transition: 0.001s height ease-in-out;
 }
 
+.validation-summary {
+    margin: .5em;
+    min-height: 1em;
+}
+
+.validation-error {
+    color: #880000;
+    text-shadow: 2px 2px 2px #ff6666;
+    font-size: 15px;
+}
+
 @media only screen and (min-width: 1501px) {
 
     #parchment h1, #loadCharacter h1, #createCharacter h1, #about h1 {
@@ -198,6 +209,14 @@ body {
     #resizeCheck {
         height: 3px;
     }
+
+    .validation-error {
+        font-size: 22px;
+    }
+
+    .validation-summary {
+        margin: -225px auto 12px auto;
+    }
     
 }
 
@@ -282,6 +301,14 @@ body {
     #resizeCheck {
         height: 2px;
     }
+
+    .validation-summary {
+        margin: -150px auto 8px auto;
+    }
+
+    .validation-error {
+        font-size: 16px;
+    }
     
 }
 
@@ -361,5 +388,12 @@ body {
     #resizeCheck {
         height: 1px;
     }
-    
+
+    .validation-summary {
+        margin: -75px auto 4px auto;
+    }
+
+    .validation-error {
+        font-size: 11px;
+    }
 }

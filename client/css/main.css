@@ -16,6 +16,10 @@ table, caption, tbody, tfoot, thead, tr, th, td {
     background: transparent;
 }
 
+article, aside, details, figcaption, figure, footer, header, menu, nav, section {
+    display: block;
+}
+
 canvas {
     position:absolute;
     image-rendering:optimizeSpeed;
@@ -48,7 +52,48 @@ canvas {
     opacity: 1;
 }
 
-#canvas, #foreground, #background, #textCanvas, #container, #border {
+footer {
+    font-family: 'AdvoCut', sans-serif;
+    position: absolute;
+    bottom: 5%;
+    left: 0;
+    text-align: center;
+    width: 100%;
+    color: #c6c0a3;
+    -moz-transition: 0.2s opacity linear;
+    -webkit-transition: 0.2s opacity linear;
+    -o-transition: 0.2s opacity linear;
+    transition: 0.2s opacity linear;
+    font-size: 16px;
+}
+
+.sub-forum-link {
+    color: #c6c0a3;
+}
+
+.link:hover {
+    cursor: pointer;
+    color: #d83939;
+}
+
+#about-link span:hover, #credits-link span:hover, #git-link span:hover, #forums-link span:hover, .sub-forum-link:hover {
+    color:#fcda5c;
+    cursor:pointer;
+}
+
+.upscaled.game footer {
+    color: #8a8a8a;
+}
+
+.intro footer, footer:hover {
+    opacity: 1;
+}
+
+footer div {
+    display: inline-block;
+}
+
+#canvas, #foreground, #background, #textCanvas, #container, #border, #footer {
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
@@ -88,6 +133,20 @@ canvas {
 #parchment input.field-error {
     background: rgba(255, 0, 0, 0.1);
     border-color: #f84444;
+}
+
+#parchment select {
+    width: 25%;
+    background: rgba(0, 0, 0, 0.05);
+    text-align: center;
+    color: black;
+}
+
+#intro {
+    -moz-transition: 0.4s opacity linear;
+    -webkit-transition: 0.4s opacity linear;
+    -o-transition: 0.4s opacity linear;
+    transition: 0.4s opacity linear;
 }
 
 #alert {
@@ -138,7 +197,7 @@ canvas {
     z-index: 1000;
 }
 
-.credits #credits, .about #about, .git #git, .death #death, .error #error, .loadCharacter #loadCharacter {
+.credits #credits, .about #about, .git #git, .death #death, .error #error, .createCharacter #createCharacter, .loadCharacter #loadCharacter {
     opacity: 1;
     pointer-events: auto;
     -moz-transition: 0.5s opacity linear;
@@ -179,19 +238,13 @@ canvas {
     animation: parchright 1s ease-in-out 1;
 }
 
-.validation-summary {
-    margin: .5em;
-    min-height: 1em;
-}
-
-.validation-error {
-    color: #880000;
-    text-shadow: 2px 2px 2px #ff6666;
-    font-size: 15px;
-}
-
 #createCharacter form {
     position: relative;
+}
+
+.loader {
+    position: relative;
+    margin-top: 25%;
 }
 
 @media only screen and (min-width: 1501px) {
@@ -235,7 +288,7 @@ canvas {
         background-position: -1152px -882px;
     }
 
-    #parchment, #loadCharacter, #error {
+    #parchment, #createCharacter, #loadCharacter, #error {
         width: 1266px;
         height: 546px;
         position: absolute;
@@ -273,6 +326,13 @@ canvas {
 
     .parchment-left, .parchment-middle, .parchment-right, #respawn {
         background-size: 1266px auto;
+    }
+
+    .animate .parchment-middle {
+        -moz-animation: parchmiddle3 1s ease-in-out 1;
+        -webkit-animation: parchmiddle3 1s ease-in-out 1;
+        -o-animation: parchmiddle3 1s ease-in-out 1;
+        animation: parchmiddle3 1s ease-in-out 1;
     }
 
     #chatBox {
@@ -350,6 +410,8 @@ canvas {
         background-size: 844px;
     }
 
+
+
     .parchment-left {
         width: 76px;
         height: 364px;
@@ -369,7 +431,7 @@ canvas {
         background-position: -768px -588px;
     }
 
-    #parchment, #loadCharacter, #error {
+    #parchment, #createCharacter, #loadCharacter, #error {
         width: 844px;
         height: 364px;
         position: absolute;
@@ -407,6 +469,13 @@ canvas {
 
     .parchment-left, .parchment-middle, .parchment-right, #respawn {
         background-size: 844px auto;
+    }
+
+    .animate .parchment-middle {
+        -moz-animation: parchmiddle2 1s ease-in-out 1;
+        -webkit-animation: parchmiddle2 1s ease-in-out 1;
+        -o-animation: parchmiddle2 1s ease-in-out 1;
+        animation: parchmiddle2 1s ease-in-out 1;
     }
 
     #chatBox {
@@ -499,7 +568,7 @@ canvas {
         background-position: -384px -294px;
     }
 
-    #parchment, #loadCharacter, #error {
+    #parchment, #createCharacter, #loadCharacter, #error {
         width: 422px;
         height: 182px;
         position: absolute;
@@ -537,6 +606,13 @@ canvas {
 
     .parchment-left, .parchment-middle, .parchment-right, #respawn {
         background-size: 422px auto;
+    }
+
+    .animate .parchment-middle {
+        -moz-animation: parchmiddle1 1s ease-in-out 1;
+        -webkit-animation: parchmiddle1 1s ease-in-out 1;
+        -o-animation: parchmiddle1 1s ease-in-out 1;
+        animation: parchmiddle1 1s ease-in-out 1;
     }
 
     #chatBox {
@@ -590,4 +666,11 @@ canvas {
     #respawn:active {
         background-position: -125px -476px;
     }
+}
+
+.tablet .animate .parchment-left, .tablet .animate .parchment-right, .tablet .animate .parchment-middle {
+    -webkit-animation:none;
+    -moz-animation:none;
+    -o-animation:none;
+    animation:none;
 }

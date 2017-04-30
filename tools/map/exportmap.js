@@ -1,107 +1,68 @@
 #!/usr/bin/env node
-
 var util = require('util'),
     Log = require('log'),
     path = require("path"),
     fs = require("fs"),
     file = require('../file'),
     processMap = require('./processmap'),
-    log = new Log(Log.DEBUG);
-    
-var source = process.argv[2],
-    mode = process.argv[3],
-    destination = process.argv[4];
+    log = new Log(Log.DEBUG),
+    source = process.argv[2];
 
-if(!mode){
-	mode = "direct";
-}
-
-if(!source || (mode!="direct" && mode!="both" && mode!="client" && mode!="server") || (mode!="direct" && !destination)) {
-    util.puts("Usage : ./exportmap.js tiled_json_file [mode] [destination]");
-    util.puts("Optional parameters : mode & destination. Values:");
-    util.puts("    - \"direct\" (default) → updates current server and map files (WARNING: SHOULD ONLY BE CALLED FROM /tools/maps !!!);");
-    util.puts("    - \"client destination_file\" → will generate destination_file.js and destination_file.json for client side map;");
-    util.puts("    - \"server destination_file.json\" → will generate destination_file.json for server side map;");
-    util.puts("    - \"both destination_directory\" → will generate world_client.js, world_client.json and world_server.json in directory.");
-    process.exit(0);
-}
-
-function main() {
-    getTiledJSONmap(source, callback_function);
-}
-
-function callback_function(json) {
-	switch(mode){
-		case "client":
-			processClient(json, destination);
-			break;
-		case "server":
-			processServer(json, destination);
-			break;
-		case "direct":
-			processClient(json, "../../client/maps/world_client");
-			processServer(json, "../../server/data/map/world_server.json");
-			break;
-			
-		case "both":
-			var directory=destination.replace(/\/+$/,'');//strip last path slashes
-			processClient(json, directory+"/world_client");
-			processServer(json, directory+"/world_server.json");
-			break;
-		default:
-			util.puts("Unrecognized mode, how on earth did you manage that ?");
-	}	
-}
-
-function processClient(json, dest){
-	var jsonMap = JSON.stringify(processMap(json, {mode:"client"})); // Save the processed map object as JSON data
-	// map in a .json file for ajax loading
-	fs.writeFile(dest+".json", jsonMap, function(err, file) {
-		if(err){
-			log.error(JSON.stringify(err));
-		}
-		else{
-			log.info("Finished processing map file: "+ dest + ".json was saved.");
-		}
-	});
-
-	// map in a .js file for web worker loading
-	jsonMap = "var mapData = " + jsonMap;
-	fs.writeFile(dest+".js", jsonMap, function(err, file) {
-		if(err){
-			log.error(JSON.stringify(err));
-		}
-		else{
-			log.info("Finished processing map file: "+ dest + ".js was saved.");
-		}
-	});
-}
-
-function processServer(json, dest){
-	var jsonMap = JSON.stringify(processMap(json, {mode:"server"})); // Save the processed map object as JSON data
-	fs.writeFile(dest, jsonMap, function(err, file) {
-		if(err){
-			log.error(JSON.stringify(err));
-		}
-		else{
-			log.info("Finished processing map file: "+ dest + " was saved.");
-		}
-	});
-}
-
-function getTiledJSONmap(filename, callback) {
+function getMap() {
     var self = this;
-    
-    file.exists(filename, function(exists) {
-        if(!exists) {  
-            log.error(filename + " doesn't exist.")
+
+    file.exists(source, function(exists) {
+        if (!exists) {
+            log.error('The file: ' + source + ' could not be found.');
             return;
         }
-    
-        fs.readFile(filename, function(err, file) {
-            callback(JSON.parse(file.toString()));
+
+        fs.readFile(source, function(error, file) {
+            onMap(JSON.parse(file.toString()));
         });
     });
 }
 
-main();
+function onMap(data) {
+    parseClient(data, '../../client/data/maps/world_client');
+    parseServer(data, '../../server/data/map/world_server.json');
+}
+
+function parseClient(data, destination) {
+    var map = JSON.stringify(processMap(data, {
+        mode: 'client'
+    }));
+
+    fs.writeFile(destination + '.json', map, function(err, file) {
+        if (err)
+            log.error(JSON.stringify(err));
+        else
+            log.info('[Client] Map saved at: ' + destination + '.json');
+    });
+
+
+    //Transform into a .js for Web Worker (will be removed when region parsing is ready)
+    map = 'var mapData = ' + map;
+
+    fs.writeFile(destination + '.js', map, function(err, file) {
+        if (err)
+            log.error(JSON.stringify(err));
+        else
+            log.info('[Client] Map saved at: ' + destination + '.js');
+    });
+}
+
+function parseServer(data, destination) {
+    var map = JSON.stringify(processMap(data, {
+        mode: 'server'
+    }));
+
+    fs.writeFile(destination, map, function(err, file) {
+        if (err)
+            log.error(JSON.stringify(err));
+        else
+            log.info('[Server] Map saved at: ' + destination + '.json');
+    });
+}
+
+getMap();

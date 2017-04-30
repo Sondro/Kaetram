@@ -2,7 +2,8 @@ var Packets = {
     Handshake: 0,
     Intro: 1,
     Welcome: 2,
-    Spawns: 3
+    Spawn: 3,
+    Error: 4
 };
 
 Packets.Opcode = {

@@ -1,6 +1,6 @@
 /* global log */
 
-define(['jquery', 'underscore'], function($, _) {
+define(['jquery'], function($) {
 
     return Class.extend({
 
@@ -59,7 +59,7 @@ define(['jquery', 'underscore'], function($, _) {
             } else {
                 log.info('Parsing map with Ajax...');
 
-                $.get('maps/world_client.json', function(data) {
+                $.get('data/maps/world_client.json', function(data) {
                     self.parseMap(data);
                     self.loadCollisions();
                     self.mapLoaded = true;

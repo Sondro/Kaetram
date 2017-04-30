@@ -11,6 +11,7 @@
     <meta property="og:description" content="The ultimate HTML5 experience!">
 
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/animations.css">
     <link rel="stylesheet" type="text/css" href="css/vars.css">
 
     <title>Kaetram</title>
@@ -34,6 +35,8 @@
             <div class="parchment-left"></div>
             <div class="parchment-middle"></div>
             <div class="parchment-right"></div>
+            <div class="loader" hidden>
+                Connecting<span class="loader__dot">.</span><span class="loader__dot">.</span><span class="loader__dot">.</span></div>
 
             <article id="loadCharacter">
                 <h1>
@@ -49,13 +52,11 @@
 
                 <div class="login">
                     <span class="link">Login</span>
-                    <img src="img/spinner.gif">
                 </div>
 
                 <div class="createNew">
                     <span class="link">New Character</span>
                 </div>
-
 
                 <div class="validation-summary"></div>
 
@@ -146,7 +147,6 @@
                 <canvas id="textCanvas"></canvas>
             </div>
         </div>
-
     </div>
 
     <footer>
@@ -166,7 +166,7 @@
 
         <div id="forums-link" class="clickable">
             <span class="dash">&ndash;</span>
-            <a class="clickable" target="_blank" href="https://forum.taptapadventure.com">Forums</a>
+            <a target="_blank" class="sub-forum-link" style="text-decoration: none" href="https://forum.taptapadventure.com">Forums</a>
         </div>
 
     </footer>
@@ -175,11 +175,6 @@
 
     <script src="js/utils/detect.js" type="text/javascript"></script>
     <script src="js/lib/log.js"></script>
-
-    <script>
-        var require = { waitSeconds: 60 };
-    </script>
-
     <script src="lib/socket.io.js"></script>
     <script src="js/lib/jquery.js"></script>
     <script data-main="js/lib/home" src="js/lib/require.js"></script>

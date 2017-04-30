@@ -34,14 +34,14 @@ WebSocket.Server = Socket.extend({
 
         self.io = new SocketIO(self.httpServer);
         self.io.on('connection', function webSocketListener(socket) {
-            log.notice('Received connection from: ' + socket._remoteAddress);
+            log.notice('Received connection from: ' + socket.conn.remoteAddress);
 
             var client = new WebSocket.Connection(self.createId(), socket, self);
 
-            socket.on('client', function(gVer, cType) {
-                log.notice('Received Version: ' + gVer + ' type: ' + cType);
+            socket.on('client', function(data) {
+                log.notice('Received Version: ' + data.gVer + ' type: ' + data.cType);
 
-                if (gVer !== self.version) {
+                if (data.gVer !== self.version) {
                     client.sendUTF8('updated');
                     client.close('Client version is out of sync with the server.');
                 }
@@ -83,18 +83,18 @@ WebSocket.Server = Socket.extend({
 
 WebSocket.Connection = Connection.extend({
 
-    init: function(id, connection, server) {
+    init: function(id, socket, server) {
         var self = this;
 
-        self._super(id, connection, server);
+        self._super(id, socket, server);
 
-        self._connection.on('message', function(message) {
+        self.socket.on('message', function(message) {
             if (self.listenCallback)
                 self.listenCallback(JSON.parse(message));
         });
 
-        self._connection.on('disconnect', function() {
-            log.notice('Closed socket: ' + self._connection._remoteAddress);
+        self.socket.on('disconnect', function() {
+            log.notice('Closed socket: ' + self.socket.conn.remoteAddress);
 
             if (self.closeCallback)
                 self.closeCallback();
@@ -116,7 +116,7 @@ WebSocket.Connection = Connection.extend({
     },
 
     sendUTF8: function(data) {
-        this._connection.send(data);
+        this.socket.send(data);
     }
 
 });

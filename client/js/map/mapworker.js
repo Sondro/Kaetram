@@ -1,4 +1,4 @@
-importScripts('../../maps/world_client.js');
+importScripts('../../data/maps/world_client.js');
 
 onmessage = function(event) {
 

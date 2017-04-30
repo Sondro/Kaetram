@@ -36,6 +36,8 @@ module.exports = World = cls.Class.extend({
             var player = new Player(self, self.database, connection);
 
             self.players[player.id] = player;
+
+            connection.sendUTF8('ready');
         });
     },
 

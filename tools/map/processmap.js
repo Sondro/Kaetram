@@ -1,8 +1,6 @@
 var fs = require("fs"),
     Log = require('log'),
-    _ = require('underscore'),
-    Types = require("../../../../Projects/Tap-Tap-Adventure/shared/js/gametypes"),
-    ItemTypes = require("../../../../Projects/Tap-Tap-Adventure/shared/js/itemtypes");
+    _ = require('underscore');
 
 var map, mode;
 var collidingTiles = {};

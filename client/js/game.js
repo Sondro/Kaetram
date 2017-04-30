@@ -1,6 +1,6 @@
 /* global Class, log*/
 
-define(['./renderer/renderer', './utils/storage', './map/map'], function(Renderer, LocalStorage, Map) {
+define(['./renderer/renderer', './utils/storage', './map/map', './network/socket'], function(Renderer, LocalStorage, Map, Socket) {
 
     return Class.extend({
 
@@ -9,13 +9,46 @@ define(['./renderer/renderer', './utils/storage', './map/map'], function(Rendere
 
             self.app = app;
 
+            self.socket = null;
+            self.messages = null;
             self.renderer = null;
             self.storage = null;
             self.map = null;
 
+            self.stopped = false;
+            self.started = false;
+            self.ready = false;
+
             self.loadRenderer();
             self.loadControllers();
             self.loadMisc();
+        },
+
+        start: function() {
+            var self = this;
+
+            self.started = true;
+            self.tick();
+        },
+
+        stop: function() {
+            var self = this;
+
+            self.stopped = false;
+            self.started = false;
+            self.ready = false;
+        },
+
+        tick: function() {
+            var self = this;
+
+            if (self.ready) {
+
+                self.renderer.render();
+
+                if (!self.stopped)
+                    requestAnimFrame(self.tick.bind(self));
+            }
         },
 
         loadRenderer: function() {
@@ -32,8 +65,10 @@ define(['./renderer/renderer', './utils/storage', './map/map'], function(Rendere
         loadControllers: function() {
             var self = this;
 
-            self.setStorage(new LocalStorage());
 
+            self.setStorage(new LocalStorage());
+            self.setSocket(new Socket(self));
+            self.setMessages(self.socket.messages);
         },
 
         loadMisc: function() {
@@ -53,16 +88,69 @@ define(['./renderer/renderer', './utils/storage', './map/map'], function(Rendere
             });
         },
 
+        connect: function() {
+            var self = this;
+
+            self.app.cleanErrors();
+
+            //Smoothening out the process.
+            setTimeout(function() {
+                self.socket.connect();
+            }, 1000);
+
+            self.messages.onHandshake(function(serverVersion, clientId, proceed) {
+                log.info('Received handshake.');
+            });
+        },
+
+        handleDisconnection: function() {
+            var self = this;
+
+            /**
+             * This function is responsible for handling sudden
+             * disconnects of a player whilst in the game, not
+             * menu-based errors.
+             */
+
+            if (!self.started)
+                return;
+
+            log.info('Player has been disconnected...');
+
+            self.app.toggleLogin(false);
+            self.app.sendError(null, 'You have been disconnected from the server...');
+        },
+
+        getScaleFactor: function() {
+            return this.app.getScaleFactor();
+        },
+
         getStorage: function() {
             return this.storage;
         },
 
+        getSocket: function() {
+            return this.socket;
+        },
+
         setRenderer: function(renderer) {
-            this.renderer = renderer;
+            if (!this.renderer)
+                this.renderer = renderer;
         },
 
         setStorage: function(storage) {
-            this.storage = storage;
+            if (!this.storage)
+                this.storage = storage;
+        },
+
+        setSocket: function(socket) {
+            if (!this.socket)
+                this.socket = socket;
+        },
+
+        setMessages: function(messages) {
+            if (!this.messages)
+                this.messages = messages;
         }
 
     });

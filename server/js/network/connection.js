@@ -8,7 +8,7 @@ module.exports = Connection = cls.Class.extend({
         var self = this;
 
         self.id = id;
-        self._connection = connection;
+        self.socket = connection;
         self._server = server;
     },
 
@@ -25,7 +25,6 @@ module.exports = Connection = cls.Class.extend({
     },
 
     close: function() {
-        log.info('Closing connection: ' + this._connection.remoteAddress);
-        this._connection.conn.close();
+        this.socket.conn.close();
     }
 });
