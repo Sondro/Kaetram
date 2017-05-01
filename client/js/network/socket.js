@@ -61,16 +61,18 @@ define(['./packets', './messages'], function(Packets, Messages) {
             if (!self.listening)
                 return;
 
-            if (typeof message === 'string')
-                self.messages.handleUTF8(message);
+            if (message.startsWith('['))
+                self.messages.handleData(JSON.parse(message).shift());
             else
-                self.messages.handleData(JSON.parse(message));
+                self.messages.handleUTF8(message);
 
         },
 
         send: function(packet, data) {
             var self = this,
                 json = JSON.stringify([packet, data]);
+
+            log.info('Sending...');
 
             if (self.connection && self.connection.connected)
                 self.connection.send(json);

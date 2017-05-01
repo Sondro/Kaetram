@@ -21,3 +21,5 @@ Packets.Opcode = {
     Login: 0,
     Register: 1
 };
+
+module.exports = Packets;

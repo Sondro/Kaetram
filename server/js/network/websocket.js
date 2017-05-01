@@ -39,8 +39,6 @@ WebSocket.Server = Socket.extend({
             var client = new WebSocket.Connection(self.createId(), socket, self);
 
             socket.on('client', function(data) {
-                log.notice('Received Version: ' + data.gVer + ' type: ' + data.cType);
-
                 if (data.gVer !== self.version) {
                     client.sendUTF8('updated');
                     client.close('Client version is out of sync with the server.');
@@ -52,12 +50,12 @@ WebSocket.Server = Socket.extend({
                 self.addConnection(client);
             });
 
-            socket.on('message', function(message) {
+            socket.on('u_message', function(message) {
                 //Used for unity messages as Socket.IO differs
 
                 if (client.listenCallback)
                     client.listenCallback(message);
-            })
+            });
         });
 
     },

@@ -5,6 +5,16 @@ var cls = require('../lib/class'),
 
 module.exports = Messages;
 
+Messages.Handshake = Message.extend({
+    init: function(clientId, proceed) {
+        this.clientId = clientId;
+    },
+
+    serialize: function() {
+        return [Packets.Handshake, this.clientId];
+    }
+});
+
 Messages.Spawn = Message.extend({
     init: function(entity) {
         this.entity = entity;

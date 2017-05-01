@@ -1,4 +1,7 @@
+/* global log, _, Packets */
+
 define(function() {
+
 
     return Class.extend({
 
@@ -34,11 +37,6 @@ define(function() {
         handleUTF8: function(message) {
             var self = this;
 
-            if (message === 'ready') {
-                self.app.updateLoader('Client ready for data!');
-                return;
-            }
-
             self.app.toggleLogin(false);
 
             switch (message) {
@@ -50,8 +48,16 @@ define(function() {
                     self.app.sendError(null, 'The servers are currently full!');
                     break;
 
+                case 'error':
+                    self.app.sendError(null, 'The server has responded with an error!');
+                    break;
+
                 case 'disallowed':
                     self.app.sendError(null, 'The server is currently not accepting connections!');
+                    break;
+
+                default:
+                    self.app.sendError(null, 'An unknown error has occurred, please refer to the forums.');
                     break;
             }
         },
@@ -61,13 +67,10 @@ define(function() {
          */
 
         receiveHandshake: function(data) {
-            var self = this,
-                serverVersion = data.shift(),
-                clientId = data.shift(),
-                canProceed = data.shift();
+            var self = this;
 
             if (self.handshakeCallback)
-                self.handshakeCallback(serverVersion, clientId, canProceed);
+                self.handshakeCallback(data.shift());
         },
 
         receiveWelcome: function(data) {
@@ -81,13 +84,13 @@ define(function() {
         receiveSpawn: function(data) {
             var self = this,
                 id = data.shift(),
-                type = data.shift(),
+                kind = data.shift(),
                 x = data.shift(),
                 y = data.shift(),
                 count = data.shift(); //For items
 
             if (self.spawnCallback)
-                self.spawnCallback(id, type, x, y, count);
+                self.spawnCallback(id, kind, x, y, count);
         },
 
         receiveError: function(data) {

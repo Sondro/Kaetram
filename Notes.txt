@@ -12,3 +12,5 @@ Kaetram To-Do List:
 
 - Music areas will be handled server sided - we must take as much load off the client as possible.
 - Redo the map? Re-arrange the map?
+
+- Change Enum to Enum.toString() for animations

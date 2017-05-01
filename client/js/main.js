@@ -47,11 +47,11 @@ define(['jquery', './app', './game'], function($, App, Game) {
         resizeCheck.bind('oTransitionEnd', app.resize.bind(app));
 
         $(window).blur(function() {
-             log.info('Screen out of focus - do stuff here.');
+             log.debug('Screen out of focus - do stuff here.');
         });
 
         $(window).focus(function() {
-             log.info('Screen focused again.');
+             log.debug('Screen focused again.');
         });
     };
 

@@ -1,6 +1,7 @@
 /* global module */
 
-var Character = require('../character');
+var Character = require('../character'),
+    Incoming = require('../../../../controllers/incoming');
 
 module.exports = Player = Character.extend({
 
@@ -8,10 +9,13 @@ module.exports = Player = Character.extend({
         var self = this;
 
         self.world = world;
-        self.database = database;
+        self.mysql = database;
         self.connection = connection;
 
         self.id = self.connection.id;
+        self.clientId = -1;
+
+        self.incoming = new Incoming(self);
 
     }
 

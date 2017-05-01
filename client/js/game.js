@@ -1,6 +1,8 @@
-/* global Class, log*/
+/* global Class, log, Packets */
 
-define(['./renderer/renderer', './utils/storage', './map/map', './network/socket'], function(Renderer, LocalStorage, Map, Socket) {
+define(['./renderer/renderer', './utils/storage',
+        './map/map', './network/socket', './entity/character/player/player',
+        './utils/modules', './network/packets'], function(Renderer, LocalStorage, Map, Socket, Player) {
 
     return Class.extend({
 
@@ -9,11 +11,15 @@ define(['./renderer/renderer', './utils/storage', './map/map', './network/socket
 
             self.app = app;
 
+            self.id = -1;
+
             self.socket = null;
             self.messages = null;
             self.renderer = null;
             self.storage = null;
             self.map = null;
+
+            self.player = null;
 
             self.stopped = false;
             self.started = false;
@@ -93,13 +99,45 @@ define(['./renderer/renderer', './utils/storage', './map/map', './network/socket
 
             self.app.cleanErrors();
 
-            //Smoothening out the process.
             setTimeout(function() {
                 self.socket.connect();
             }, 1000);
 
-            self.messages.onHandshake(function(serverVersion, clientId, proceed) {
-                log.info('Received handshake.');
+            self.messages.onHandshake(function(clientId) {
+
+                self.id = clientId;
+
+                self.ready = true;
+
+                if (!self.player)
+                    self.createPlayer();
+
+                self.app.updateLoader('Logging in');
+
+                if (self.app.isRegistering()) {
+                    var registerInfo = self.app.registerFields,
+                        username = registerInfo[0].val(),
+                        password = registerInfo[1].val(),
+                        email = registerInfo[2].val();
+
+                    self.socket.send(Packets.Intro, [Packets.Opcode.Register, username, password, email]);
+                } else {
+                    var loginInfo = self.app.loginFields,
+                        name = loginInfo[0].val(),
+                        pass = loginInfo[1].val();
+
+                    self.socket.send(Packets.Intro, [Packets.Opcode.Login, name, pass]);
+                }
+            });
+
+            self.messages.onWelcome(function(playerData) {
+
+                self.player.entityId = playerData.shift();
+
+            });
+
+            self.messages.onSpawn(function() {
+
             });
         },
 
@@ -119,6 +157,12 @@ define(['./renderer/renderer', './utils/storage', './map/map', './network/socket
 
             self.app.toggleLogin(false);
             self.app.sendError(null, 'You have been disconnected from the server...');
+        },
+
+        createPlayer: function() {
+            var self = this;
+
+            self.player = new Player();
         },
 
         getScaleFactor: function() {

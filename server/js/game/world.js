@@ -5,7 +5,9 @@ var cls = require('../lib/class'),
     Player = require('./entity/character/player/player'),
     Map = require('../map/map'),
     _ = require('underscore'),
-    Messages = require('../network/messages');
+    Messages = require('../network/messages'),
+    Utils = require('../util/utils'),
+    Packets = require('../network/packets');
 
 module.exports = World = cls.Class.extend({
 
@@ -33,11 +35,12 @@ module.exports = World = cls.Class.extend({
         self.ready = false;
 
         self.onPlayerConnection(function(connection) {
-            var player = new Player(self, self.database, connection);
+            var clientId = Utils.generateClientId(),
+                player = new Player(self, self.database, connection, clientId);
 
-            self.players[player.id] = player;
+            self.addPlayer(player);
 
-            connection.sendUTF8('ready');
+            self.pushToPlayer(player, new Messages.Handshake(clientId));
         });
     },
 
@@ -198,6 +201,103 @@ module.exports = World = cls.Class.extend({
         });
 
         player.recentGroups = [];
+    },
+
+    addToGroup: function(entity, groupId) {
+        var self = this,
+            newGroups = [];
+
+        if (entity && groupId && (groupId in self.groups)) {
+            self.map.groups.forEachAdjacentGroup(groupId, function(id) {
+                var group = self.groups[id];
+
+                if (group && group.entities) {
+                    group.entities[entity.id] = entity;
+                    newGroups.push(id);
+                }
+            });
+
+            entity.group = groupId;
+
+            if (entity instanceof Player)
+                self.groups[groupId].players.push(entity.id);
+        }
+
+        return newGroups;
+    },
+
+    removeFromGroups: function(entity) {
+        var self = this,
+            oldGroups = [];
+
+        if (entity && entity.group) {
+            var group = self.groups[entity.group];
+
+            if (entity instanceof Player)
+                group.players = _.reject(group.players, function(id) { return id === entity.id; });
+
+            self.map.groups.forEachAdjacentGroup(entity.group, function(id) {
+                if (self.groups[id] && entity.id in self.groups[id].entities) {
+                    delete self.groups[id].entities[entity.id];
+                    oldGroups.push(id);
+                }
+            });
+
+            entity.group = null;
+        }
+
+        return oldGroups;
+    },
+
+    incomingToGroup: function(entity, groupId) {
+        var self = this;
+
+        if (!entity || !groupId)
+            return;
+
+        self.map.groups.forEachAdjacentGroup(groupId, function(id) {
+            var group = self.groups[id];
+
+            if (group && !_.include(group.entities, entity.id))
+                group.incoming.push(entity);
+        });
+    },
+
+    handleEntityGroup: function(entity) {
+        var self = this,
+            groupsChanged = false;
+
+        if (!entity)
+            return groupsChanged;
+
+        var groupId = self.map.groups.groupIdFromPosition(entity.x, entity.y);
+
+        if (!entity.group || (entity.group && entity.group !== groupId)) {
+            groupsChanged = true;
+
+            self.incomingToGroup(entity, groupId);
+
+            var oldGroups = self.removeFromGroups(entity),
+                newGroups = self.addToGroup(entity, groupId);
+
+            if (_.size(oldGroups) > 0)
+                entity.recentGroups = _.difference(oldGroups, newGroups);
+        }
+    },
+
+    addEntity: function(entity) {
+        var self = this;
+
+        self.entities[entity.id] = entity;
+        self.handleEntityGroup(entity);
+    },
+
+    addPlayer: function(player) {
+        var self = this;
+
+        self.addEntity(player);
+        self.players[player.id] = player;
+        self.packets[player.id] = [];
     },
 
     onPopulationUpdate: function(callback) {

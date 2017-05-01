@@ -58,7 +58,7 @@ function Main() {
 
     setTimeout(function() {
         for (var i = 0; i < config.worlds; i++)
-            worlds.push(new World(i + 1, webSocket));
+            worlds.push(new World(i + 1, webSocket, database));
 
         allowConnections = true;
 

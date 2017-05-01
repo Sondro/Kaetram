@@ -203,6 +203,10 @@ define(['jquery'], function($) {
             return this.parchment[0].className;
         },
 
+        isRegistering: function() {
+            return this.getActiveForm() === 'createCharacter';
+        },
+
         resize: function() {
             log.info('Screen re-sized, scale: ' + this.getScaleFactor());
             log.info('Supports workers: ' + this.hasWorker());
