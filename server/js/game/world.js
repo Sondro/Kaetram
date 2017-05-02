@@ -49,6 +49,13 @@ module.exports = World = cls.Class.extend({
 
         log.info('************ World ' + self.id + ' ***********');
 
+        /**
+         * The reason maps are loaded per each world is because
+         * we can have slight modifications for each world if we want in the
+         * future. Using region loading, we can just send the client
+         * whatever new map we have created server sided. Cleaner and nicer.
+         */
+
         self.map = new Map(self);
         self.map.isReady(function() {
             self.loadGroups();

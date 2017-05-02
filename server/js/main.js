@@ -6,7 +6,8 @@ var fs = require('fs'),
     WebSocket = require('./network/websocket'),
     Utils = require('./util/utils'),
     _ = require('underscore'),
-    allowConnections = false;
+    allowConnections = false,
+    Parser = require('./util/parser');
 
 log = new Log(config.worlds > 1 ? 'notice' : config.debugLevel, config.localDebug ? fs.createWriteStream('runtime.log') : null);
 
@@ -65,8 +66,14 @@ function Main() {
         log.notice('Finished creating ' + worlds.length + ' world' + (worlds.length > 1 ? 's' : '') + '!');
 
         initializeWorlds(worlds);
+        loadParser();
+
     }, 200);
 
+}
+
+function loadParser() {
+    new Parser();
 }
 
 function initializeWorlds(worlds) {

@@ -1,5 +1,7 @@
 var cls = require('../lib/class'),
-    mysql = require('mysql');
+    mysql = require('mysql'),
+    Creator = require('./creator'),
+    _ = require('underscore');
 
 module.exports = MySQL = cls.Class.extend({
 
@@ -31,39 +33,57 @@ module.exports = MySQL = cls.Class.extend({
 
         self.onSelected(function() {
             log.info('Successfully established connection to the MySQL database!');
+
+            self.creator.createDatabases();
         });
+
+        self.creator = new Creator(self);
     },
 
     login: function(player) {
-        var self = this;
+        var self = this,
+            found;
 
         log.info('Logging in player...');
 
-        self.query('SELECT * FROM `player_data`, `player_equipment` WHERE `player_data`.`name`=' + "'" + player.username + "'", function(error, rows, fields) {
+        self.query('SELECT * FROM `player_data`, `player_equipment` WHERE `player_data`.`username`=' + "'" + player.username + "'", function(error, rows, fields) {
             if (error)
                 throw error;
 
-            for (var index in rows) {
-                if (rows.hasOwnProperty(index)) {
-                    var row = rows[index];
+            _.each(rows, function(row) {
+                if (row.name === player.username) {
+                    found = true;
 
-                    if (row.name === player.name) {
-
-                        log.info('Just set data here...');
-
-                        return;
-                    }
+                    log.info('Found the player here...');
                 }
-            }
+            });
 
-            self.register(player);
+            if (!found)
+                self.register(player);
         });
     },
 
     register: function(player) {
         var self = this;
 
-        log.info('Registering player...');
+        self.query('SELECT * FROM `player_data` WHERE `player_data`.`username`=' + "'" + player.username + "'", function(error, rows, fields) {
+            var exists;
+
+            _.each(rows, function(row) {
+                if (row.name === player.username)
+                    exists = true;
+            });
+
+            if (!exists) {
+                log.info('Player: ' + player.username + ' does not exist, registering...');
+
+                player.isNew = true;
+                player.load(self.creator.getPlayerData(player));
+                self.creator.save(player);
+                player.intro();
+            }
+        });
+
     },
 
     loadDatabases: function() {
