@@ -29,7 +29,30 @@ module.exports = Player = Character.extend({
     load: function(data) {
         var self = this;
 
-        self.username = data.username;
+        self.x = data.x;
+        self.y = data.y;
+        self.kind = data.kind;
+        self.rights = data.rights;
+        self.hitPoints = data.hitPoints;
+        self.mana = data.mana;
+        self.experience = data.experience;
+        self.ban = data.ban;
+        self.membership = data.membership;
+        self.lastLogin = data.lastLogin;
+        self.pvpKills = data.pvpKills;
+        self.pvpDeaths = data.pvpDeaths;
+        
+        var armour = data.armour,
+            weapon = data.weapon,
+            pendant = data.pendant,
+            ring = data.ring,
+            boots = data.boots;
+        
+        self.setArmour(armour[0], armour[1], armour[2], armour[3]);
+        self.setWeapon(weapon[0], weapon[1], weapon[2], weapon[3]);
+        self.setPendant(pendant[0], pendant[1], pendant[2], pendant[3]);
+        self.setRing(ring[0], ring[1], ring[2], ring[3]);
+        self.setBoots(boots[0], boots[1], boots[2], boots[3]);
 
         self.isNew = false;
     },

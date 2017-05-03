@@ -307,6 +307,15 @@ module.exports = World = cls.Class.extend({
         self.packets[player.id] = [];
     },
 
+    playerInWorld: function(username) {
+        _.each(this.players, function(player) {
+            if (player.username === username)
+                return true;
+        });
+
+        return false;
+    },
+
     onPopulationUpdate: function(callback) {
         this.populationCallback = callback;
     },

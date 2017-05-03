@@ -56,6 +56,18 @@ define(function() {
                     self.app.sendError(null, 'The server is currently not accepting connections!');
                     break;
 
+                case 'userexists':
+                    self.app.sendError(null, 'The username you have chosen already exists.');
+                    break;
+
+                case 'loggedin':
+                    self.app.sendError(null, 'The player is already logged in!');
+                    break;
+
+                case 'invalidlogin':
+                    self.app.sendError(null, 'You have entered the wrong username or password.');
+                    break;
+
                 default:
                     self.app.sendError(null, 'An unknown error has occurred, please refer to the forums.');
                     break;

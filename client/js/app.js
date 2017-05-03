@@ -233,12 +233,19 @@ define(['jquery'], function($) {
             return width <= 1000 ? 1 : ((width <= 1500 || height <= 870) ? 2 : 3);
         },
 
+        revertLoader: function() {
+            this.updateLoader('Connecting');
+        },
+
         updateLoader: function(message) {
-            this.loading.html(message + '<span class="loader__dot">.</span><span class="loader__dot">.</span><span class="loader__dot">.</span>');
+            var dots = '<span class="loader__dot">.</span><span class="loader__dot">.</span><span class="loader__dot">.</span>';
+            this.loading.html(message + dots);
         },
 
         toggleLogin: function(toggle) {
             var self = this;
+
+            self.revertLoader();
 
             if (toggle) {
                 self.loginButton.fadeOut('slow');

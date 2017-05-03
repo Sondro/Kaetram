@@ -6,64 +6,49 @@ module.exports = Creator = cls.Class.extend({
         var self = this;
 
         self.mysql = mysql;
-        self.connection = self.mysql.connection;
+
     },
 
-    createDatabases: function() {
+    createTables: function() {
         var self = this;
 
-        self.connection.query('CREATE TABLE IF NOT EXISTS player_data (' +
+        self.mysql.connection.query('CREATE TABLE IF NOT EXISTS player_data (' +
             'username varchar(64),' +
             'password varchar(64),' +
             'email varchar(64),' +
             'x int,' +
             'y int,' +
-            'exp int,' +
+            'experience int,' +
             'kind int,' +
             'rights int,' +
             'class int,' +
             'poisoned tinyint,' +
-            'hitpoints int,' +
+            'hitPoints int,' +
             'mana int,' +
             'pvpKills int,' +
             'pvpDeaths int,' +
             'rank int,' +
             'ban int(64),' +
             'membership int(64),' +
-            'TTACoins int(32),' +
+            'lastLogin int(64),' +
             'PRIMARY KEY(username))');
 
-        self.connection.query('CREATE TABLE IF NOT EXISTS player_equipment (' +
+        self.mysql.connection.query('CREATE TABLE IF NOT EXISTS player_equipment (' +
             'username varchar(64),' +
             'armour varchar(64),' +
             'weapon varchar(64),' +
             'pendant varchar(64),' +
             'ring varchar(64),' +
             'boots varchar(64),' +
-            'armourEnchantedPoint tinyint,' +
-            'armourSkillKind tinyint,' +
-            'armourSkillLevel tinyint,' +
-            'weaponEnchantedPoint tinyint,' +
-            'weaponSkillKind tinyint,' +
-            'weaponSkillLevel tinyint,' +
-            'pendantEnchantedPoint tinyint,' +
-            'pendantSkillKind tinyint,' +
-            'pendantSkillLevel tinyint,' +
-            'ringEnchantedPoint tinyint,' +
-            'ringSkillKind tinyint,' +
-            'ringSkillLevel tinyint,' +
-            'bootsEnchantedPoint tinyint,' +
-            'bootsSkillKind tinyint,' +
-            'bootsSkillLevel tinyint,' +
             'PRIMARY KEY(username))');
 
-        self.connection.query('CREATE TABLE IF NOT EXISTS player_quest (' +
+        self.mysql.connection.query('CREATE TABLE IF NOT EXISTS player_quest (' +
             'username varchar(64),' +
             'id tinyint,' +
             'progress smallint,' +
             'PRIMARY KEY(username))');
 
-        self.connection.query('CREATE TABLE IF NOT EXISTS player_bank (' +
+        self.mysql.connection.query('CREATE TABLE IF NOT EXISTS player_bank (' +
             'username varchar(64),' +
             'ids text COLLATE utf8_unicode_ci NOT NULL,' +
             'counts text COLLATE utf8_unicode_ci NOT NULL,' +
@@ -71,14 +56,14 @@ module.exports = Creator = cls.Class.extend({
             'skillLevels text COLLATE utf8_unicode_ci NOT NULL,' +
             'PRIMARY KEY(username))');
 
-        self.connection.query('CREATE TABLE IF NOT EXISTS player_skills (' +
+        self.mysql.connection.query('CREATE TABLE IF NOT EXISTS player_skills (' +
             'username varchar(64),' +
             'skills text COLLATE utf8_unicode_ci NOT NULL,' +
             'skillLevels text COLLATE utf8_unicode_ci NOT NULL,' +
             'skillSlots text COLLATE utf8_unicode_ci NOT NULL,' +
             'PRIMARY KEY (username))');
 
-        self.connection.query('CREATE TABLE IF NOT EXISTS player_inventory (' +
+        self.mysql.connection.query('CREATE TABLE IF NOT EXISTS player_inventory (' +
             'username varchar(64),' +
             'ids text COLLATE utf8_unicode_ci NOT NULL,' +
             'counts text COLLATE utf8_unicode_ci NOT NULL,' +
@@ -86,62 +71,69 @@ module.exports = Creator = cls.Class.extend({
             'skillLevels text COLLATE utf8_unicode_ci NOT NULL,' +
             'PRIMARY KEY(username))');
 
-        self.connection.query('CREATE TABLE IF NOT EXISTS ipbans (' +
+        self.mysql.connection.query('CREATE TABLE IF NOT EXISTS ipbans (' +
             'ip varchar(64),' +
             'ipban int(64),' +
-            'PRIMARY KEY(ip))');
+            'PRIMARY KEY(ip))', function(error) {
+            if (!error) {
+                log.info('[MySQL] Successfully created 7 tables.');
+                self.mysql.connect(true, true);
+            }
+        });
     },
 
     save: function(player) {
         var self = this,
             isNew = player.isNew,
-            queryKey = isNew ? 'INSERT INTO' : 'UPDATE';
+            queryKey = isNew ? 'INSERT INTO' : 'UPDATE',
+            playerData = self.formatData(self.getPlayerData(player), 'data'),
+            equipmentData = self.formatData(self.getPlayerData(player), 'equipment');
 
-        self.mysql.query(queryKey + '`player_data` SET ?', {
-            username: player.username,
-            password: player.password,
-            email: player.email,
-            x: player.x,
-            y: player.y,
-            experience: player.experience,
-            kind: player.kind,
-            rights: player.rights,
-            ban: player.ban,
-            membership: player.membership,
-            lastLogin: player.lastLogin,
-            pvpKills: player.pvpKills,
-            pvpDeaths: player.pvpDeaths
-        });
+        log.info('Query Key: ' + isNew);
 
-        var armour = player.getArmour(),
-            weapon = player.getWeapon(),
-            pendant = player.getPendant(),
-            ring = player.getRing(),
-            boots = player.getBoots();
+        self.mysql.connection.query(queryKey + ' `player_data` SET ?', playerData);
+        self.mysql.connection.query(queryKey + ' `player_equipment` SET ?', equipmentData);
+    },
 
-        self.mysql.query(queryKey + '`player_equipment` SET ?', {
-            username: player.username,
-            armour: armour.getName(),
-            weapon: weapon.getName(),
-            pendant: pendant.getName(),
-            ring: ring.getName(),
-            boots: boots.getName(),
-            armourEnchantedPoint: armour.getCount(),
-            armourSkill: armour.getSkill(),
-            armourSkillLevel: armour.getSkillLevel(),
-            weaponEnchantedPoint: weapon.getCount(),
-            weaponSkill: weapon.getSkill(),
-            weaponSkillLevel: weapon.getSkillLevel(),
-            pendantEnchantedPoint: pendant.getCount(),
-            pendantSkill: pendant.getSkill(),
-            pendantSkillLevel: pendant.getSkillLevel(),
-            ringEnchantedPoint: ring.getCount(),
-            ringSkill: ring.getSkill(),
-            ringSkillLevel: ring.getSkillLevel(),
-            bootsEnchantedPoint: boots.getCount(),
-            bootsSkill: boots.getSkill(),
-            bootsSkillLevel: boots.getSkillLevel()
-        });
+    formatData: function(data, type) {
+        var formattedData;
+
+        switch(type) {
+            case 'data':
+                formattedData = {
+                    username: data.username,
+                    password: data.password,
+                    email: data.email,
+                    x: data.x,
+                    y: data.y,
+                    kind: data.kind,
+                    rights: data.rights,
+                    hitPoints: data.hitPoints,
+                    mana: data.mana,
+                    experience: data.experience,
+                    ban: data.ban,
+                    membership: data.membership,
+                    lastLogin: data.lastLogin,
+                    pvpKills: data.pvpKills,
+                    pvpDeaths: data.pvpDeaths
+                };
+                break;
+
+            case 'equipment':
+
+                formattedData = {
+                    username: data.username,
+                    armour: data.armour.toString(),
+                    weapon: data.weapon.toString(),
+                    pendant: data.pendant.toString(),
+                    ring: data.ring.toString(),
+                    boots: data.boots.toString()
+                };
+
+                break;
+        }
+
+        return formattedData;
     },
 
     getPlayerData: function(player) {
@@ -149,23 +141,23 @@ module.exports = Creator = cls.Class.extend({
             username: player.username,
             password: player.password,
             email: player.email ? player.email : 'null',
-            x: 0,
-            y: 0,
-            kind: 0,
-            rights: 0,
-            hitPoints: 100,
-            mana: 15,
-            experience: 0,
-            ban: 0,
-            membership: 0,
-            lastLogin: 0,
-            armour: ['clotharmor', 0, 0, 0],
-            pvpKills: 0,
-            pvpDeaths: 0,
-            weapon: ['', 0, 0, 0],
-            pendant: ['', 0, 0, 0],
-            ring: ['', 0, 0, 0],
-            boots: ['', 0, 0, 0]
+            x: player.x ? player.x : 0,
+            y: player.y ? player.y : 0,
+            kind: player.kind ? player.kind : 0,
+            rights: player.rights ? player.rights : 0,
+            hitPoints: player.hitPoints ? player.hitPoints : 100,
+            mana: player.mana ? player.mana : 20,
+            experience: player.experience ? player.experience : 0,
+            ban: player.ban ? player.ban : 0,
+            membership: player.membership ? player.membership : 0,
+            lastLogin: player.lastLogin ? player.lastLogin : 0,
+            pvpKills: player.pvpKills ? player.pvpKills : 0,
+            pvpDeaths: player.pvpDeaths ? player.pvpDeaths : 0,
+            armour: [player.armour ? player.armour.getName().toLowerCase() : 'clotharmor', player.armour ? player.armour.getCount() : 0, player.armour ? player.armour.getSkill() : 0, player.armour ? player.armour.getSkillLevel() : 0],
+            weapon: [player.weapon ? player.weapon.getName().toLowerCase() : '', player.weapon ? player.weapon.getCount() : 0, player.weapon ? player.weapon.getSkill() : 0, player.weapon ? player.weapon.getSkillLevel() : 0],
+            pendant: [player.pendant ? player.pendant.getName().toLowerCase() : '', player.pendant ? player.pendant.getCount() : 0, player.pendant ? player.pendant.getSkill() : 0, player.pendant ? player.pendant.getSkillLevel() : 0],
+            ring: [player.ring ? player.ring.getName().toLowerCase() : '', player.ring ? player.ring.getCount() : 0, player.ring ? player.ring.getSkill() : 0, player.ring ? player.ring.getSkillLevel() : 0],
+            boots: [player.boots ? player.boots.getName().toLowerCase() : '', player.boots ? player.boots.getCount() : 0, player.boots ? player.boots.getSkill() : 0, player.boots ? player.boots.getSkillLevel() : 0]
         }
     }
 

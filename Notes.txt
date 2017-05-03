@@ -1,16 +1,13 @@
 Kaetram To-Do List:
 
-- Move ornament to Vars.css
 - Finish basic tile-map rendering
 - Begin moving all CSS to Sass
 - Begin entity-rendering and distribution of sprites (scales accordingly)
 
-
 - Get proper button interfaces for "Login," "New Character" and "Back."
 - Directly download map data from the server.
 
+- Convert the getPlayerData(player) method from MySQL to be directly inputted into
+  query(``, {});
 
-- Music areas will be handled server sided - we must take as much load off the client as possible.
-- Redo the map? Re-arrange the map?
-
-- Change Enum to Enum.toString() for animations
+- Automate the MySQL database selection and creation process.

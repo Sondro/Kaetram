@@ -29,7 +29,7 @@ define(['../entity'], function(Entity) {
             self.spriteFlipY = false;
 
             if (_.indexOf(o, animation) >= 0) {
-                animation += '_' + (orientation === Modules.Orientation.Left ? 'right' : self.orientationToString(orientation))
+                animation += '_' + (orientation === Modules.Orientation.Left ? 'right' : self.orientationToString(orientation));
                 self.spriteFlipX = self.orientation === Modules.Orientation.Left;
             }
 

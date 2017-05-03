@@ -5,7 +5,7 @@ var cls = require('../lib/class'),
 
 module.exports = MySQL = cls.Class.extend({
 
-    init: function(host, port, user, pass) {
+    init: function(host, port, user, pass, database) {
         var self = this;
 
         /**
@@ -15,27 +15,63 @@ module.exports = MySQL = cls.Class.extend({
          * moved back into TTA.
          */
 
+        self.host = host;
+        self.port = port;
+        self.user = user;
+        self.password = pass;
+        self.database = database;
+
+        self.connect(true, false);
+        self.loadCallbacks();
+        self.loadCreator();
+    },
+
+    connect: function(usingDB, forceCallbacks) {
+        var self = this;
+
+        if (self.connection) {
+            self.connection.destroy();
+            self.connection = null;
+        }
+
         self.connection = mysql.createConnection({
-            host: host,
-            port: port,
-            user: user,
-            password: pass
+            host: self.host,
+            port: self.port,
+            user: self.user,
+            password: self.password,
+            database: usingDB ? self.database : null
         });
+
+        if (forceCallbacks)
+            self.loadCallbacks();
+    },
+
+    loadCallbacks: function() {
+        var self = this;
 
         self.connection.connect(function(err) {
             if (err) {
-                log.info('An error has occurred whilst connecting to the MySQL database: ' + err);
+                log.info('[MySQL] No database found...');
+
+                self.connect(false, false);
+
+                self.loadDatabases();
                 return;
             }
 
-            self.loadDatabases();
+            log.info('Successfully established connection to the MySQL database!');
         });
 
         self.onSelected(function() {
-            log.info('Successfully established connection to the MySQL database!');
-
-            self.creator.createDatabases();
+            self.creator.createTables();
         });
+    },
+
+    loadCreator: function() {
+        var self = this;
+
+        if (self.creator)
+            return;
 
         self.creator = new Creator(self);
     },
@@ -46,13 +82,15 @@ module.exports = MySQL = cls.Class.extend({
 
         log.info('Logging in player...');
 
-        self.query('SELECT * FROM `player_data`, `player_equipment` WHERE `player_data`.`username`=' + "'" + player.username + "'", function(error, rows, fields) {
+        self.connection.query('SELECT * FROM `player_data`, `player_equipment` WHERE `player_data`.`username`=' + "'" + player.username + "'", function(error, rows, fields) {
             if (error)
                 throw error;
 
             _.each(rows, function(row) {
-                if (row.name === player.username) {
+                if (row.username === player.username) {
                     found = true;
+
+                    log.info('Armour: ' + row.armour);
 
                     log.info('Found the player here...');
                 }
@@ -66,7 +104,7 @@ module.exports = MySQL = cls.Class.extend({
     register: function(player) {
         var self = this;
 
-        self.query('SELECT * FROM `player_data` WHERE `player_data`.`username`=' + "'" + player.username + "'", function(error, rows, fields) {
+        self.connection.query('SELECT * FROM `player_data` WHERE `player_data`.`username`=' + "'" + player.username + "'", function(error, rows, fields) {
             var exists;
 
             _.each(rows, function(row) {
@@ -83,7 +121,6 @@ module.exports = MySQL = cls.Class.extend({
                 player.intro();
             }
         });
-
     },
 
     loadDatabases: function() {
@@ -93,22 +130,11 @@ module.exports = MySQL = cls.Class.extend({
             if (error)
                 throw error;
 
+            log.info('[MySQL] Successfully generated database.');
+
             self.connection.query('USE TTA', function(error, results, fields) {
                 if (self.selectDatabase_callback)
                     self.selectDatabase_callback();
-            });
-        });
-    },
-
-    query: function(parameters, callback) {
-        var self = this;
-
-        self.connection.query('USE TTA', function(error, results, fields) {
-            if (error)
-                throw error;
-
-            self.connection.query(parameters, function(error, rows, fields) {
-                callback(error, rows, fields);
             });
         });
     },

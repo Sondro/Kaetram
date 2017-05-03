@@ -1,5 +1,6 @@
 var cls = require('../lib/class'),
-    Packets = require('../network/packets');
+    Packets = require('../network/packets'),
+    Request = require('request');
 
 module.exports = Incoming = cls.Class.extend({
 
@@ -40,10 +41,51 @@ module.exports = Incoming = cls.Class.extend({
         self.player.password = password.substr(0, 32);
         self.player.email = email.substr(0, 128);
 
-        if (isRegistering)
-            self.mysql.register(self.player);
-        else
-            self.mysql.login(self.player);
+        if (isRegistering) {
+            var registerOptions = {
+                method: 'GET',
+                uri: 'https://taptapadventure.com/api/register/index.php?a=9a4c5ddb-5ce6-4a01-a14f-3ae49d8c6507&u=' + self.player.username.toLowerCase() + '&p=' + self.player.password + '&e=' + self.player.email
+            };
+
+            Request(registerOptions, function(error, response, body) {
+                switch(JSON.parse(JSON.parse(body).data).code) {
+                    case 'ok':
+                        self.mysql.register(self.player);
+                        break;
+
+                    default:
+                        self.connection.sendUTF8('userexists');
+                        self.connection.close('Username: ' + username + ' not available.');
+                        break;
+                }
+            });
+        } else {
+            var loginOptions = {
+                method: 'POST',
+                uri: 'https://forum.taptapadventure.com/api/ns/login',
+                form: {
+                    'username': self.player.username.toLowerCase(),
+                    'password': self.player.password
+                }
+            };
+
+            Request(loginOptions, function(error, response, body) {
+                var data = JSON.parse(body);
+
+                if (data.message) {
+                    self.connection.sendUTF8('invalidlogin');
+                    self.connection.close('Wrong password entered for: ' + self.player.username);
+                } else {
+                    if (self.world.playerInWorld(self.player.username)) {
+                        self.connection.sendUTF8('loggedin');
+                        self.connection.close('Player already logged in..');
+                        return;
+                    }
+
+                    self.mysql.login(self.player);
+                }
+            });
+        }
     }
 
 });

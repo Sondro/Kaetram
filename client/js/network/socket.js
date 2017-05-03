@@ -22,6 +22,8 @@ define(['./packets', './messages'], function(Packets, Messages) {
             var self = this,
                 url = 'ws://' + self.config.ip + ':' + self.config.port;
 
+            self.connection = null;
+
             self.connection = io(url, {
                 forceNew: true,
                 reconnection: false
