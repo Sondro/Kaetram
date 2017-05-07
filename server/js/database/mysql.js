@@ -80,8 +80,6 @@ module.exports = MySQL = cls.Class.extend({
         var self = this,
             found;
 
-        log.info('Logging in player...');
-
         self.connection.query('SELECT * FROM `player_data`, `player_equipment` WHERE `player_data`.`username`=' + "'" + player.username + "'", function(error, rows, fields) {
             if (error)
                 throw error;

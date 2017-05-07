@@ -25,6 +25,8 @@ canvas {
     image-rendering:optimizeSpeed;
 }
 
+
+
 #background {
     background:url('../img/loading.png') no-repeat center center, #000;
 }
@@ -78,6 +80,10 @@ footer {
 
 .intro footer, footer:hover {
     opacity: 1;
+}
+
+.game footer {
+    opacity: 0;
 }
 
 footer div {
@@ -163,6 +169,10 @@ footer div {
     transition: 0.4s opacity linear;
 }
 
+#parchment {
+    opacity: 0;
+}
+
 .intro #logo, .intro #parchment {
     opacity: 1;
 }
@@ -243,17 +253,29 @@ footer div {
     margin-top: 25%;
 }
 
+#container {
+    top: 48%;
+    left: 50%;
+}
+
+
 @media only screen and (min-width: 1501px) {
     #border {
         position: absolute;
         width: 1470px;
         height: 732px;
         left: 50%;
-        margin-left: -735px;
         top: 15px;
+        margin-left: -735px;
         border: 0;
         padding: 15px;
         background: url('../img/3/main.png') no-repeat 0 0;
+    }
+
+    #container {
+        width: 1470px;
+        margin: -378px auto auto -735px;
+        position: absolute;
     }
 
     .upscaled .parchment-left, .upscaled .parchment-middle, .upscaled .parchment-right, .upscaled #respawn {
@@ -390,11 +412,17 @@ footer div {
         width: 980px;
         height: 488px;
         left: 50%;
-        margin-left: -490px;
         top: 10px;
+        margin-left: -490px;
         border: 0;
         padding: 10px;
         background: url('../img/2/main.png') no-repeat 0 0;
+    }
+
+    #container {
+        width: 980px;
+        margin: -252px auto auto -490px;
+        position: absolute;
     }
 
     .upscaled .parchment-left, .upscaled .parchment-middle, .upscaled .parchment-right, .upscaled #respawn {
@@ -534,11 +562,17 @@ footer div {
         width: 490px;
         height: 244px;
         left: 50%;
-        margin-left: -245px;
         top: 5px;
+        margin-left: -245px;
         border: 0;
         padding: 5px;
         background: url('../img/1/main.png') no-repeat 0 0;
+    }
+
+    #container {
+        width: 490px;
+        margin: -126px auto auto -245px;
+        position: absolute;
     }
 
     .parchment-left, .parchment-middle, .parchment-right {

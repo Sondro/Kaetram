@@ -13,8 +13,10 @@ define(['jquery'], function($) {
 
             self.body = $('body');
             self.parchment = $('#parchment');
+            self.container = $('#container');
+            self.window = $(window);
 
-            self.parchmentAnimation = $('.animate .parchment-left');
+            self.intro = $('#intro');
 
             self.loginButton = $('.login');
             self.registerButton = $('.createNew');
@@ -28,6 +30,7 @@ define(['jquery'], function($) {
 
             self.parchmentAnimating = false;
 
+            self.zoom();
             self.updateOrientation();
             self.load();
         },
@@ -48,26 +51,43 @@ define(['jquery'], function($) {
 
             window.scrollTo(0, 1);
 
+            self.window.resize(function() {
+                self.zoom();
+            });
+
             $.getJSON('data/config.json', function(json) {
                 self.config = json;
 
                 if (self.readyCallback)
                     self.readyCallback();
             });
+
+        },
+
+        zoom: function() {
+            var self = this,
+                zoomFactor = self.window.width() / self.container.width();
+
+            self.body.css({
+                'zoom': zoomFactor,
+                '-moz-transform': 'scale(' + zoomFactor + ')'
+            });
         },
 
         fadeMenu: function() {
-            var self = this;
+            var self = this,
+                onFinish = function() {
+                    self.body.addClass('started');
+                    self.body.removeClass('intro');
+                };
 
-            document.addEventListener('transitionend', function() {
-                log.info('Hey');
-            });
+            self.updateLoader(null);
 
-            self.body.addClass('started');
-            self.body.removeClass('intro');
+            log.info('Closing menu');
 
             setTimeout(function() {
                 self.body.addClass('game');
+                onFinish();
             }, 500);
         },
 
@@ -226,7 +246,9 @@ define(['jquery'], function($) {
         },
 
         resize: function() {
-            this.game.resize();
+            var self = this;
+
+            self.game.resize();
         },
 
         setGame: function(game) {
@@ -255,8 +277,15 @@ define(['jquery'], function($) {
         },
 
         updateLoader: function(message) {
+            var self = this;
+
+            if (!message) {
+                self.loading.html('');
+                return;
+            }
+
             var dots = '<span class="loader__dot">.</span><span class="loader__dot">.</span><span class="loader__dot">.</span>';
-            this.loading.html(message + dots);
+            self.loading.html(message + dots);
         },
 
         toggleLogin: function(toggle) {

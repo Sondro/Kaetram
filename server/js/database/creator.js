@@ -87,8 +87,6 @@ module.exports = Creator = cls.Class.extend({
             playerData = self.formatData(self.getPlayerData(player), 'data'),
             equipmentData = self.formatData(self.getPlayerData(player), 'equipment');
 
-        log.info(equipmentData);
-
         self.mysql.connection.query(queryKey + ' `player_data` SET ?', playerData);
         self.mysql.connection.query(queryKey + ' `player_equipment` SET ?', equipmentData);
     },

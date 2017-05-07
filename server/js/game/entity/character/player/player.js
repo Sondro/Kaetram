@@ -87,8 +87,6 @@ module.exports = Player = Character.extend({
                 self.pvpDeaths
             ];
 
-        log.info(info);
-
         /**
          * Send player data to client here
          */
