@@ -15,6 +15,16 @@ Messages.Handshake = Message.extend({
     }
 });
 
+Messages.Welcome = Message.extend({
+    init: function(data) {
+        this.data = data; //array of info
+    },
+
+    serialize: function() {
+        return [Packets.Welcome, this.data];
+    }
+});
+
 Messages.Spawn = Message.extend({
     init: function(entity) {
         this.entity = entity;
@@ -23,4 +33,16 @@ Messages.Spawn = Message.extend({
     serialize: function() {
         return [Packets.Spawns].concat(this.entities.getState());
     }
+});
+
+Messages.Equipment = Message.extend({
+
+    init: function(equipmentData) {
+        this.equipmentData = equipmentData;
+    },
+
+    serialize: function() {
+        return [Packets.Equipment, this.equipmentData];
+    }
+
 });

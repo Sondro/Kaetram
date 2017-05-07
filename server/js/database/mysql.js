@@ -90,9 +90,16 @@ module.exports = MySQL = cls.Class.extend({
                 if (row.username === player.username) {
                     found = true;
 
-                    log.info('Armour: ' + row.armour);
+                    var data = row;
 
-                    log.info('Found the player here...');
+                    data.armour = data.armour.split(',').map(Number);
+                    data.weapon = data.weapon.split(',').map(Number);
+                    data.pendant = data.pendant.split(',').map(Number);
+                    data.ring = data.ring.split(',').map(Number);
+                    data.boots = data.boots.split(',').map(Number);
+
+                    player.load(data);
+                    player.intro();
                 }
             });
 
@@ -118,6 +125,7 @@ module.exports = MySQL = cls.Class.extend({
                 player.isNew = true;
                 player.load(self.creator.getPlayerData(player));
                 self.creator.save(player);
+                player.isNew = false;
                 player.intro();
             }
         });

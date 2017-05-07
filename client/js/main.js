@@ -12,9 +12,8 @@ define(['jquery', './app', './game'], function($, App, Game) {
             chatInput = $('#chatInput');
 
             addClasses();
-            addListeners();
-
             initGame();
+            addListeners();
         });
 
     };
@@ -46,12 +45,8 @@ define(['jquery', './app', './game'], function($, App, Game) {
         resizeCheck.bind('webkitTransitionEnd', app.resize.bind(app));
         resizeCheck.bind('oTransitionEnd', app.resize.bind(app));
 
-        $(window).blur(function() {
-             log.debug('Screen out of focus - do stuff here.');
-        });
-
-        $(window).focus(function() {
-             log.debug('Screen focused again.');
+        $(window).on('orientationchange', function(event) {
+            app.updateOrientation();
         });
     };
 

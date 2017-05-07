@@ -43,15 +43,6 @@ canvas {
     transition: 1s opacity linear 0.5s;
 }
 
-.intro #container {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.game #container {
-    opacity: 1;
-}
-
 footer {
     font-family: 'AdvoCut', sans-serif;
     position: absolute;
@@ -174,6 +165,11 @@ footer div {
 
 .intro #logo, .intro #parchment {
     opacity: 1;
+}
+
+.intro #container {
+    opacity: 0;
+    pointer-events: none;
 }
 
 #parchment p {

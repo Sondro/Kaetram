@@ -10,11 +10,13 @@
     <meta property="og:site_name" content="Kaetram">
     <meta property="og:description" content="The ultimate HTML5 experience!">
 
-    <link rel="stylesheet" type="text/css" href="css/main.css">
     <link rel="stylesheet" type="text/css" href="css/animations.css">
+    <link rel="stylesheet" type="text/css" href="css/game.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
     <link rel="stylesheet" type="text/css" href="css/vars.css">
 
     <title>Kaetram</title>
+
 </head>
 <body class="intro">
 
@@ -33,105 +35,105 @@
         <section id="parchment" class="loadCharacter">
 
             <div class="parchment-left"></div>
-            <div class="parchment-middle"></div>
-            <div class="parchment-right"></div>
-            <div class="loader" hidden>
-                Connecting<span class="loader__dot">.</span><span class="loader__dot">.</span><span class="loader__dot">.</span></div>
+            <div class="parchment-middle">
+                <article id="loadCharacter">
+                    <h1>
+                        <span class="left-ornament"></span>
+                        Kaetram
+                        <span class="right-ornament"></span>
+                    </h1>
 
-            <article id="loadCharacter">
-                <h1>
-                    <span class="left-ornament"></span>
-                    Kaetram
-                    <span class="right-ornament"></span>
-                </h1>
+                    <form method="get" accept-charset="utf-8">
+                        <input type="text" id="loginNameInput" class="stroke" name="player-name" placeholder="Username" maxlength="32" autofocus>
+                        <input type="password" id="loginPasswordInput" class="stroke" name="player-password" placeholder="Password" maxlength="64">
+                    </form>
 
-                <form method="get" accept-charset="utf-8">
-                    <input type="text" id="loginNameInput" class="stroke" name="player-name" placeholder="Username" maxlength="32" autofocus>
-                    <input type="password" id="loginPasswordInput" class="stroke" name="player-password" placeholder="Password" maxlength="64">
-                </form>
+                    <div class="login">
+                        <span class="link">Login</span>
+                    </div>
 
-                <div class="login">
-                    <span class="link">Login</span>
-                </div>
+                    <div class="createNew">
+                        <span class="link">New Character</span>
+                    </div>
 
-                <div class="createNew">
-                    <span class="link">New Character</span>
-                </div>
+                    <div class="validation-summary"></div>
 
-                <div class="validation-summary"></div>
+                </article>
 
-            </article>
-
-            <article id="createCharacter">
-                <h1>
-                    <span class="left-ornament"></span>
-                    New Character
-                    <span class="right-ornament"></span>
-                </h1>
+                <article id="createCharacter">
+                    <h1>
+                        <span class="left-ornament"></span>
+                        New Character
+                        <span class="right-ornament"></span>
+                    </h1>
 
 
-                <form method="get" accept-charset="utf-8">
-                    <input type="text" id="registerNameInput" class="stroke" name="player-name" placeholder="Username" maxlength="32">
-                    <input type="password" id="registerPasswordInput" class="stroke" name="player-password" placeholder="Password" maxlength="64">
-                    <input type="password" id="registerPasswordConfirmationInput" class="stroke" name="player-password2" placeholder="Confirm Password" maxlength="64">
-                    <input type="email" id="registerEmailInput" class="stroke" name="player-email" placeholder="Email Address" maxlength="64">
-                </form>
+                    <form method="get" accept-charset="utf-8">
+                        <input type="text" id="registerNameInput" class="stroke" name="player-name" placeholder="Username" maxlength="32">
+                        <input type="password" id="registerPasswordInput" class="stroke" name="player-password" placeholder="Password" maxlength="64">
+                        <input type="password" id="registerPasswordConfirmationInput" class="stroke" name="player-password2" placeholder="Confirm Password" maxlength="64">
+                        <input type="email" id="registerEmailInput" class="stroke" name="player-email" placeholder="Email Address" maxlength="64">
+                    </form>
 
-                <div class="login">
-                    <span class="link">Create</span>
-                </div>
+                    <div class="login">
+                        <span class="link">Create</span>
+                    </div>
 
-                <p></p>
+                    <p></p>
 
-                <div class="cancel">
-                    <span class="link">Cancel</span>
-                </div>
+                    <div class="cancel">
+                        <span class="link">Cancel</span>
+                    </div>
 
-                <div class="validation-summary"></div>
+                    <div class="validation-summary"></div>
 
-            </article>
+                </article>
 
-            <article id="credits">
+                <article id="credits">
 
-            </article>
+                </article>
 
-            <article id="about">
-                <h1>
-                    <span class="left-ornament"></span>
+                <article id="about">
+                    <h1>
+                        <span class="left-ornament"></span>
 
-                    <span class="title">
+                        <span class="title">
                         About
                     </span>
 
-                    <span class="right-ornament"></span>
-                </h1>
+                        <span class="right-ornament"></span>
+                    </h1>
 
-                <p id="description">
-                    Kaetram is a 2D HTML5 multiplayer experience available in the comfort of your browser.
-                </p>
-
-                <div class="right">
-                    <div class="img"></div>
-                    <p>
-                        It is fully compatible with modern-day browsers and seeks to
-                        expand towards offering support on older ones too!
+                    <p id="description">
+                        Kaetram is a 2D HTML5 multiplayer experience available in the comfort of your browser.
                     </p>
-                </div>
 
-                <div id="close-about">
-                    <span>-- Click anywhere to close --</span>
-                </div>
+                    <div class="right">
+                        <div class="img"></div>
+                        <p>
+                            It is fully compatible with modern-day browsers and seeks to
+                            expand towards offering support on older ones too!
+                        </p>
+                    </div>
 
-            </article>
+                    <div id="close-about">
+                        <span>-- Click anywhere to close --</span>
+                    </div>
 
-            <article id="git">
-                Structure this later
-            </article>
+                </article>
 
-            <article id="death">
-                <p>You have died...</p>
-                <div id="respawn" class="button"></div>
-            </article>
+                <article id="git">
+                    Structure this later
+                </article>
+
+                <article id="death">
+                    <p>You have died...</p>
+                    <div id="respawn" class="button"></div>
+                </article>
+            </div>
+            <div class="parchment-right"></div>
+            <div class="loader" hidden>
+                Connecting<span class="loader__dot">.</span><span class="loader__dot">.</span><span class="loader__dot">.</span></div>
 
         </section>
 

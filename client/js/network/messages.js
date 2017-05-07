@@ -23,7 +23,7 @@ define(function() {
             self.messages[Packets.Handshake] = self.receiveHandshake;
             self.messages[Packets.Welcome] = self.receiveWelcome;
             self.messages[Packets.Spawn] = self.receiveSpawn;
-            self.messages[Packets.Error] = self.receiveError;
+            self.messages[Packets.Equipment] = self.receiveEquipment;
         },
 
         handleData: function(data) {
@@ -105,13 +105,12 @@ define(function() {
                 self.spawnCallback(id, kind, x, y, count);
         },
 
-        receiveError: function(data) {
+        receiveEquipment: function(data) {
             var self = this,
-                type = data.shift(),
-                message = data.shift();
+                equipInfo = data.shift();
 
-            if (self.errorCallback)
-                self.errorCallback(type, message);
+            if (self.equipmentCallback)
+                self.equipmentCallback(equipInfo);
         },
 
         /**
@@ -130,8 +129,8 @@ define(function() {
             this.spawnCallback = callback;
         },
 
-        onError: function(callback) {
-            this.errorCallback = callback;
+        onEquipment: function(callback) {
+            this.equipmentCallback = callback;
         }
 
     });

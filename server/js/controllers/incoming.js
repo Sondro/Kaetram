@@ -33,7 +33,7 @@ module.exports = Incoming = cls.Class.extend({
             loginType = message.shift(),
             username = message.shift().toLowerCase(),
             password = message.shift(),
-            isRegistering = loginType === Packets.Opcode.Register,
+            isRegistering = loginType === Packets.IntroOpcode.Register,
             email = isRegistering ? message.shift() : '',
             formattedUsername = username.charAt(0).toUpperCase() + username.slice(1);
 

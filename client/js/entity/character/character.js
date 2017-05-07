@@ -15,6 +15,13 @@ define(['../entity'], function(Entity) {
             self.prevGridY = -1;
 
             self.orientation = Modules.Orientation.Down;
+
+            self.hitPoints = -1;
+            self.maxHitPoints = -1;
+            self.mana = -1;
+            self.maxMana = -1;
+
+            self.isMoving = false;
         },
 
         animate: function(animation, speed, count, onEndCount) {
@@ -52,6 +59,10 @@ define(['../entity'], function(Entity) {
                 case oM.Down:
                     return 'down';
             }
+        },
+
+        setGridPosition: function(x, y) {
+            this._super(x, y);
         }
     });
 

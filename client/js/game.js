@@ -34,6 +34,7 @@ define(['./renderer/renderer', './utils/storage',
             var self = this;
 
             self.started = true;
+            self.app.fadeMenu();
             self.tick();
         },
 
@@ -70,7 +71,6 @@ define(['./renderer/renderer', './utils/storage',
 
         loadControllers: function() {
             var self = this;
-
 
             self.setStorage(new LocalStorage());
             self.setSocket(new Socket(self));
@@ -112,6 +112,9 @@ define(['./renderer/renderer', './utils/storage',
                 if (!self.player)
                     self.createPlayer();
 
+                if (!self.map)
+                    self.loadMap();
+
                 self.app.updateLoader('Logging in');
 
                 if (self.app.isRegistering()) {
@@ -120,20 +123,49 @@ define(['./renderer/renderer', './utils/storage',
                         password = registerInfo[1].val(),
                         email = registerInfo[2].val();
 
-                    self.socket.send(Packets.Intro, [Packets.Opcode.Register, username, password, email]);
+                    self.socket.send(Packets.Intro, [Packets.IntroOpcode.Register, username, password, email]);
                 } else {
                     var loginInfo = self.app.loginFields,
                         name = loginInfo[0].val(),
                         pass = loginInfo[1].val();
 
-                    self.socket.send(Packets.Intro, [Packets.Opcode.Login, name, pass]);
+                    self.socket.send(Packets.Intro, [Packets.IntroOpcode.Login, name, pass]);
                 }
             });
 
-            self.messages.onWelcome(function(playerData) {
+            self.messages.onWelcome(function(data) {
 
-                self.player.entityId = playerData.shift();
+                self.player.id = data.shift();
+                self.player.username = data.shift();
 
+                var x = data.shift(),
+                    y = data.shift();
+
+                self.player.setGridPosition(x, y);
+                
+                self.player.kind = data.shift();
+                self.player.rights = data.shift();
+
+                var hitPointsData = data.shift(),
+                    manaData = data.shift();
+
+                self.player.hitPoints = hitPointsData.shift();
+                self.player.maxHitPoints = hitPointsData.shift();
+
+                self.player.mana = manaData.shift();
+                self.player.maxMana = manaData.shift();
+
+                self.player.experience = data.shift();
+                self.player.level = data.shift();
+
+                self.player.lastLogin = data.shift();
+                self.player.pvpKills = data.shift();
+                self.player.pvpDeaths = data.shift();
+
+
+                self.socket.send(Packets.Ready, [true]);
+
+                self.start();
             });
 
             self.messages.onSpawn(function() {
@@ -153,10 +185,15 @@ define(['./renderer/renderer', './utils/storage',
             if (!self.started)
                 return;
 
-            log.info('Player has been disconnected...');
-
             self.app.toggleLogin(false);
             self.app.sendError(null, 'You have been disconnected from the server...');
+        },
+
+        resize: function() {
+            var self = this,
+                newScale = self.getScaleFactor();
+
+
         },
 
         createPlayer: function() {

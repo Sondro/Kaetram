@@ -21,7 +21,6 @@ module.exports = Creator = cls.Class.extend({
             'experience int,' +
             'kind int,' +
             'rights int,' +
-            'class int,' +
             'poisoned tinyint,' +
             'hitPoints int,' +
             'mana int,' +
@@ -84,12 +83,11 @@ module.exports = Creator = cls.Class.extend({
 
     save: function(player) {
         var self = this,
-            isNew = player.isNew,
-            queryKey = isNew ? 'INSERT INTO' : 'UPDATE',
+            queryKey = player.isNew ? 'INSERT INTO' : 'UPDATE',
             playerData = self.formatData(self.getPlayerData(player), 'data'),
             equipmentData = self.formatData(self.getPlayerData(player), 'equipment');
 
-        log.info('Query Key: ' + isNew);
+        log.info(equipmentData);
 
         self.mysql.connection.query(queryKey + ' `player_data` SET ?', playerData);
         self.mysql.connection.query(queryKey + ' `player_equipment` SET ?', equipmentData);
@@ -106,16 +104,18 @@ module.exports = Creator = cls.Class.extend({
                     email: data.email,
                     x: data.x,
                     y: data.y,
+                    experience: data.experience,
                     kind: data.kind,
                     rights: data.rights,
+                    poisoned: data.poisoned,
                     hitPoints: data.hitPoints,
                     mana: data.mana,
-                    experience: data.experience,
+                    pvpKills: data.pvpKills,
+                    pvpDeaths: data.pvpDeaths,
+                    rank: data.rank,
                     ban: data.ban,
                     membership: data.membership,
-                    lastLogin: data.lastLogin,
-                    pvpKills: data.pvpKills,
-                    pvpDeaths: data.pvpDeaths
+                    lastLogin: data.lastLogin
                 };
                 break;
 
@@ -147,17 +147,19 @@ module.exports = Creator = cls.Class.extend({
             rights: player.rights ? player.rights : 0,
             hitPoints: player.hitPoints ? player.hitPoints : 100,
             mana: player.mana ? player.mana : 20,
+            poisoned: player.poisoned ? player.poisoned : 0,
             experience: player.experience ? player.experience : 0,
             ban: player.ban ? player.ban : 0,
+            rank: player.rank ? player.rank : 0,
             membership: player.membership ? player.membership : 0,
             lastLogin: player.lastLogin ? player.lastLogin : 0,
             pvpKills: player.pvpKills ? player.pvpKills : 0,
             pvpDeaths: player.pvpDeaths ? player.pvpDeaths : 0,
-            armour: [player.armour ? player.armour.getName().toLowerCase() : 'clotharmor', player.armour ? player.armour.getCount() : 0, player.armour ? player.armour.getSkill() : 0, player.armour ? player.armour.getSkillLevel() : 0],
-            weapon: [player.weapon ? player.weapon.getName().toLowerCase() : '', player.weapon ? player.weapon.getCount() : 0, player.weapon ? player.weapon.getSkill() : 0, player.weapon ? player.weapon.getSkillLevel() : 0],
-            pendant: [player.pendant ? player.pendant.getName().toLowerCase() : '', player.pendant ? player.pendant.getCount() : 0, player.pendant ? player.pendant.getSkill() : 0, player.pendant ? player.pendant.getSkillLevel() : 0],
-            ring: [player.ring ? player.ring.getName().toLowerCase() : '', player.ring ? player.ring.getCount() : 0, player.ring ? player.ring.getSkill() : 0, player.ring ? player.ring.getSkillLevel() : 0],
-            boots: [player.boots ? player.boots.getName().toLowerCase() : '', player.boots ? player.boots.getCount() : 0, player.boots ? player.boots.getSkill() : 0, player.boots ? player.boots.getSkillLevel() : 0]
+            armour: [player.armour ? player.armour.getId() : 114, player.armour ? player.armour.getCount() : 0, player.armour ? player.armour.getSkill() : 0, player.armour ? player.armour.getSkillLevel() : 0],
+            weapon: [player.weapon ? player.weapon.getId() : -1, player.weapon ? player.weapon.getCount() : 0, player.weapon ? player.weapon.getSkill() : 0, player.weapon ? player.weapon.getSkillLevel() : 0],
+            pendant: [player.pendant ? player.pendant.getId() : -1, player.pendant ? player.pendant.getCount() : 0, player.pendant ? player.pendant.getSkill() : 0, player.pendant ? player.pendant.getSkillLevel() : 0],
+            ring: [player.ring ? player.ring.getId() : -1, player.ring ? player.ring.getCount() : 0, player.ring ? player.ring.getSkill() : 0, player.ring ? player.ring.getSkillLevel() : 0],
+            boots: [player.boots ? player.boots.getId() : -1, player.boots ? player.boots.getCount() : 0, player.boots ? player.boots.getSkill() : 0, player.boots ? player.boots.getSkillLevel() : 0]
         }
     }
 

@@ -5,9 +5,7 @@ define(['../character'], function(Character) {
         init: function() {
             var self = this;
 
-            self._super('player', Modules.Types.Player);
-
-            self.entityId = -1;
+            self._super(-1, Modules.Types.Player);
 
             self.username = '';
             self.password = '';
@@ -16,6 +14,9 @@ define(['../character'], function(Character) {
             self.avatar = null;
 
             self.wanted = false;
+            self.experience = -1;
+            self.pvpKills = -1;
+            self.pvpDeaths = -1;
 
             self.prevX = 0;
             self.prevY = 0;
@@ -31,6 +32,10 @@ define(['../character'], function(Character) {
             self.pendant = null;
             self.ring = null;
             self.boots = null;
+        },
+
+        setGridPosition: function(x, y) {
+            this._super(x, y);
         }
 
     });

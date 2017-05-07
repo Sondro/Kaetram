@@ -10,6 +10,13 @@ Items.idToString = function(id) {
     return 'null';
 };
 
+Items.idToName = function(id) {
+    if (id in Items.Ids)
+        return Items.Ids[id].name;
+
+    return 'null';
+};
+
 Items.stringToId = function(name) {
     if (name in Items.Data)
         return Items.Data[name].id;

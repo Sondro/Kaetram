@@ -8,6 +8,7 @@ module.exports = Character = Entity.extend({
         var self = this;
 
         self.name = name;
+        self.level = -1;
     }
 
 });

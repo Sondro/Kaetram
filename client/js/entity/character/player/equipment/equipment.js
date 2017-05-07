@@ -9,21 +9,21 @@ define(function() {
 
     return Class.extend({
 
-        init: function(kind, points, skill, skillLevel) {
+        init: function(name, count, skill, skillLevel) {
             var self = this;
 
-            self.kind = kind;
-            self.points = points;
+            self.name = name;
+            self.count = count;
             self.skill = skill;
             self.skillLevel = skillLevel;
         },
 
-        getKind: function() {
-            return this.kind;
+        getName: function() {
+            return this.name;
         },
 
-        getPoints: function() {
-            return this.points;
+        getCount: function() {
+            return this.count;
         },
 
         getSkill: function() {

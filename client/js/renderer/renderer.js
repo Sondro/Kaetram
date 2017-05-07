@@ -1,3 +1,5 @@
+/* global _, log */
+
 define(['./camera'], function(Camera) {
 
     return Class.extend({
@@ -19,11 +21,10 @@ define(['./camera'], function(Camera) {
             self.canvases = [self.background, self.entities, self.foreground, self.textCanvas];
 
             self.game = game;
-            self.app = self.game.app;
             self.camera = null;
 
-            self.mobile = self.app.isMobile();
-            self.tablet = self.app.isTablet();
+            self.mobile = self.game.app.isMobile();
+            self.tablet = self.game.app.isTablet();
 
             self.scale = 1;
             self.tileSize = 16;
@@ -71,12 +72,46 @@ define(['./camera'], function(Camera) {
         render: function() {
             var self = this;
 
-            self.drawText('You are dumb.', 0, 0);
+
         },
 
         /**
          * Context Drawing
          */
+
+        draw: function() {
+            var self = this;
+
+            self.forEachVisibleTile(function(id, index) {
+                if (self.map.isHighTile(id))
+                    self.drawTile(self.foreground, id)
+
+            });
+        },
+
+        drawTile: function(context, tileId, tileset, setWidth, gridWidth, cellId) {
+            var self = this;
+
+            if (tileId === -1)
+                return;
+
+            self.drawScaledImage(context,
+                tileset,
+                self.getX(tileId + 1, (setWidth / self.scale) * self.tileSize),
+                Math.floor(tileId / (setWidth / self.scale) * self.tileSize),
+                self.tileSize, self.tileSize,
+                self.getX(cellId + 1, gridWidth) * self.tileSize,
+                Math.floor(cellId / gridWidth) * self.tileSize);
+        },
+
+        clearTile: function(context, gridWidth, cellId) {
+            var self = this,
+                x = self.getX(cellId + 1, gridWidth) * self.tileSize * self.scale,
+                y = Math.floor(cellId / gridWidth) * self.tileSize * self.scale,
+                w = self.tileSize * self.scale;
+
+            context.clearRect(x, y, w, w);
+        },
 
         drawText: function(text, x, y, centered, colour, strokeColour) {
             var self = this,
@@ -102,20 +137,49 @@ define(['./camera'], function(Camera) {
             }
         },
 
+        drawScaledImage: function(context, image, x, y, width, height, dx, dy) {
+            var self = this;
+
+            if (context)
+                return;
+
+            context.drawImage(image,
+                x * self.scale,
+                y * self.scale,
+                width * self.scale,
+                height * self.scale,
+                dx * self.scale,
+                dy * self.scale);
+        },
+
         /**
          * Primordial Rendering functions
          */
 
-        forEachTile: function(callback) {
+        forEachVisibleTile: function(callback) {
             var self = this,
                 y = self.camera.gridY,
                 maxY = self.camera.gridY - self.camera.gridHeight,
                 x = self.camera.gridX,
                 maxX = self.camera.gridX + self.camera.gridWidth;
 
-            for (; y < maxY; y++)
-                for (; x < maxX; x++)
-                    callback(x, y);
+            for (; y < maxY; y++) {
+                for (; x < maxX; x++) {
+                    if (self.map.isOutOfBounds(x, y))
+                        continue;
+
+                    var tileIndex = self.map.gridPositionToIndex(x, y) - 1;
+
+                    if (_.isArray(self.map.data[tileIndex]))
+                        _.each(self.map.data[tileIndex], function(id) {
+                            callback(id - 1, tileIndex);
+                        });
+                    else
+                        if (!(isNaN(self.map.data[tileIndex] - 1)))
+                            callback(self.map.data[tileIndex] - 1, tileIndex);
+
+                }
+            }
         },
 
         isVisiblePosition: function(x, y) {
@@ -129,6 +193,14 @@ define(['./camera'], function(Camera) {
 
         clean: function() {
 
+        },
+
+        /**
+         * Rendering Functions
+         */
+
+        setCameraView: function(context) {
+            context.translate(-this.camera.x * this.scale, -this.camera.y * this.scale);
         },
 
         /**
@@ -149,6 +221,21 @@ define(['./camera'], function(Camera) {
             for (var index in self.canvases)
                 if (self.canvases.hasOwnProperty(index))
                     callback(self.canvases[index]);
+        },
+
+        getX: function(index, width) {
+            if (index === 0)
+                return 0;
+
+            return (index % width === 0) ? width - 1 : (index % width) - 1;
+        },
+
+        /**
+         * Setters
+         */
+
+        setTileset: function(tileset) {
+            this.tileset = tileset;
         }
 
     });

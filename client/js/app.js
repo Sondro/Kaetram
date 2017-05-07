@@ -14,6 +14,8 @@ define(['jquery'], function($) {
             self.body = $('body');
             self.parchment = $('#parchment');
 
+            self.parchmentAnimation = $('.animate .parchment-left');
+
             self.loginButton = $('.login');
             self.registerButton = $('.createNew');
             self.helpButton = $('#helpButton');
@@ -26,6 +28,7 @@ define(['jquery'], function($) {
 
             self.parchmentAnimating = false;
 
+            self.updateOrientation();
             self.load();
         },
 
@@ -51,6 +54,21 @@ define(['jquery'], function($) {
                 if (self.readyCallback)
                     self.readyCallback();
             });
+        },
+
+        fadeMenu: function() {
+            var self = this;
+
+            document.addEventListener('transitionend', function() {
+                log.info('Hey');
+            });
+
+            self.body.addClass('started');
+            self.body.removeClass('intro');
+
+            setTimeout(function() {
+                self.body.addClass('game');
+            }, 500);
         },
 
         openScroll: function(origin, destination) {
@@ -208,8 +226,7 @@ define(['jquery'], function($) {
         },
 
         resize: function() {
-            log.info('Screen re-sized, scale: ' + this.getScaleFactor());
-            log.info('Supports workers: ' + this.hasWorker());
+            this.game.resize();
         },
 
         setGame: function(game) {
@@ -256,6 +273,14 @@ define(['jquery'], function($) {
                 self.registerButton.fadeIn('slow');
                 self.loading.attr('hidden', true);
             }
+        },
+
+        updateOrientation: function() {
+            this.orientation = this.getOrientation();
+        },
+
+        getOrientation: function() {
+            return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
         },
 
         onReady: function(callback) {

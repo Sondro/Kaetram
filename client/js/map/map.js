@@ -33,11 +33,9 @@ define(['jquery'], function($) {
 
             if (self.mapLoaded && self.tilesetsLoaded)
                 rC();
-            else {
-                setTimeout(function() {
-                    self.ready();
-                }, 50);
-            }
+            else
+                setTimeout(function() { self.ready(); }, 50);
+
         },
 
         load: function() {

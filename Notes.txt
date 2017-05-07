@@ -7,7 +7,14 @@ Kaetram To-Do List:
 - Get proper button interfaces for "Login," "New Character" and "Back."
 - Directly download map data from the server.
 
-- Convert the getPlayerData(player) method from MySQL to be directly inputted into
-  query(``, {});
+- When game is in a fully playable state, separate client packets from server packets.
+- Add 'extra' to parsing of tiles
 
-- Automate the MySQL database selection and creation process.
+
+Finished:
+
+- Convert the getPlayerData(player) method from MySQL to be directly inputted into
+  query(``, {}); ✓
+- Automate the MySQL database selection and creation process. ✓
+- Music areas will be handled server sided - we must take as much load off the client as possible. ✓
+- Move ornament to Vars.css ✓

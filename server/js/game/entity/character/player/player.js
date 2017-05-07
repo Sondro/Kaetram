@@ -7,11 +7,15 @@ var Character = require('../character'),
     Pendant = require('./equipment/pendant'),
     Ring = require('./equipment/ring'),
     Boots = require('./equipment/boots'),
-    Items = require('../../../../util/items');
+    Items = require('../../../../util/items'),
+    Messages = require('../../../../network/messages'),
+    Formulas = require('../../../formulas'),
+    Hitpoints = require('./points/hitpoints'),
+    Mana = require('./points/mana');
 
 module.exports = Player = Character.extend({
 
-    init: function(world, database, connection) {
+    init: function(world, database, connection, clientId) {
         var self = this;
 
         self.world = world;
@@ -19,23 +23,27 @@ module.exports = Player = Character.extend({
         self.connection = connection;
 
         self.id = self.connection.id;
-        self.clientId = -1;
+        self.clientId = clientId;
 
         self.incoming = new Incoming(self);
 
         self.isNew = false;
+        self.ready = false;
     },
 
     load: function(data) {
         var self = this;
 
+        log.info(data);
+
         self.x = data.x;
         self.y = data.y;
         self.kind = data.kind;
         self.rights = data.rights;
-        self.hitPoints = data.hitPoints;
-        self.mana = data.mana;
         self.experience = data.experience;
+        self.level = Formulas.expToLevel(self.experience);
+        self.hitPoints = new Hitpoints(data.hitPoints, Formulas.getMaxHitPoints(self.level));
+        self.mana = new Mana(data.mana, Formulas.getMaxMana(self.level));
         self.ban = data.ban;
         self.membership = data.membership;
         self.lastLogin = data.lastLogin;
@@ -47,23 +55,53 @@ module.exports = Player = Character.extend({
             pendant = data.pendant,
             ring = data.ring,
             boots = data.boots;
-        
+
         self.setArmour(armour[0], armour[1], armour[2], armour[3]);
         self.setWeapon(weapon[0], weapon[1], weapon[2], weapon[3]);
         self.setPendant(pendant[0], pendant[1], pendant[2], pendant[3]);
         self.setRing(ring[0], ring[1], ring[2], ring[3]);
         self.setBoots(boots[0], boots[1], boots[2], boots[3]);
-
-        self.isNew = false;
     },
 
     intro: function() {
         var self = this;
 
+        if (self.ban > new Date()) {
+            self.connection.sendUTF8('ban');
+            self.connection.close('Player: ' + self.player.username + ' is banned.');
+        }
+
+        var info = [
+                self.id,
+                self.username,
+                self.x,
+                self.y,
+                self.kind,
+                self.rights,
+                self.hitPoints.getData(),
+                self.mana.getData(),
+                self.experience,
+                self.level,
+                self.lastLogin,
+                self.pvpKills,
+                self.pvpDeaths
+            ];
+
+        log.info(info);
+
         /**
          * Send player data to client here
          */
 
+        self.send(new Messages.Welcome(info));
+    },
+
+    sendEquipment: function() {
+        var self = this,
+            info = [self.armour.getData(), self.weapon.getData(),
+                    self.pendant.getData(), self.ring.getData(), self.boots.getData];
+
+        self.send(new Messages.Equipment(info));
     },
 
     setArmour: function(id, count, skill, skillLevel) {
@@ -129,6 +167,10 @@ module.exports = Player = Character.extend({
 
     getBoots: function() {
         return this.boots;
+    },
+
+    send: function(message) {
+        this.world.pushToPlayer(this, message);
     }
 
 });

@@ -3,13 +3,21 @@ var cls = require('../lib/class'),
     ItemData = require('../../data/items.json'),
     Items = require('./items'),
     NPCs = require('./npcs'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    Formulas = require('../game/formulas');
 
 module.exports = Parser = cls.Class.extend({
 
     init: function() {
+        var self = this;
+
+        self.loadNPCData();
+        self.loadItemData();
+        self.loadLevels();
+    },
+
+    loadNPCData: function() {
         var self = this,
-            itemCounter = 0,
             npcCounter = 0;
 
         _.each(NPCData, function(value, key) {
@@ -27,6 +35,11 @@ module.exports = Parser = cls.Class.extend({
         });
 
         log.info('Finished loading ' + npcCounter + ' NPCs.');
+    },
+
+    loadItemData: function() {
+        var self = this,
+            itemCounter = 0;
 
         _.each(ItemData, function(value, key) {
             key = key.toLowerCase();
@@ -48,6 +61,17 @@ module.exports = Parser = cls.Class.extend({
         });
 
         log.info('Finished loading ' + itemCounter + ' items.');
+    },
+
+    loadLevels: function() {
+
+        Formulas.LevelExp[0] = 0;
+
+        for (var i = 1; i < 130; i++) {
+            var points = Math.floor(0.25 * Math.floor(i + 300 * Math.pow(2, i / 7)));
+            Formulas.LevelExp[i] = points + Formulas.LevelExp[i - 1];
+        }
+
     }
 
 });

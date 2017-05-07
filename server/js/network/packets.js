@@ -14,12 +14,20 @@ var Packets = {
     Handshake: 0,
     Intro: 1,
     Welcome: 2,
-    Spawns: 3
+    Spawns: 3,
+    Equipment: 4,
+    Ready: 5
 };
 
-Packets.Opcode = {
+Packets.IntroOpcode = {
     Login: 0,
     Register: 1
+};
+
+Packets.EquipmentOpcode = {
+    Batch: 0,
+    Equip: 1,
+    Unequip: 2
 };
 
 module.exports = Packets;

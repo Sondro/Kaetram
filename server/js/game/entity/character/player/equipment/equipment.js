@@ -1,4 +1,5 @@
-var cls = require('../../../../../lib/class');
+var cls = require('../../../../../lib/class'),
+    Items = require('../../../../../util/items');
 
 module.exports = Equipment = cls.Class.extend({
 
@@ -35,6 +36,10 @@ module.exports = Equipment = cls.Class.extend({
 
     getSkillLevel: function() {
         return this.skillLevel;
+    },
+
+    getData: function() {
+        return [Items.idToName(id), this.count, this.skill, this.skillLevel];
     }
 
 });
