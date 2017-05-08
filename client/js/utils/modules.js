@@ -8,5 +8,11 @@ Modules = {
 
     Types: {
         Player: 0
+    },
+
+    InputType: {
+        Key: 0,
+        LeftClick: 1,
+        RightClick: 2
     }
 };

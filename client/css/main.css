@@ -25,12 +25,6 @@ canvas {
     image-rendering:optimizeSpeed;
 }
 
-
-
-#background {
-    background:url('../img/loading.png') no-repeat center center, #000;
-}
-
 #background, #textCanvas, #foreground {
     margin: 0;
     padding: 0;

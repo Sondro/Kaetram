@@ -1,4 +1,4 @@
-/* global log, Class, Detect */
+/* global log, Class, Detect, Modules */
 
 define(['jquery'], function($) {
 
@@ -60,6 +60,15 @@ define(['jquery'], function($) {
 
                 if (self.readyCallback)
                     self.readyCallback();
+            });
+
+            $(document).keydown(function(e) {
+                if (!self.game.started)
+                    return;
+
+                var key = e.which;
+
+                self.game.input(Modules.InputType.Key, key);
             });
 
         },

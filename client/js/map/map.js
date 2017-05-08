@@ -74,10 +74,10 @@ define(['jquery'], function($) {
              * that neither the entities would be necessary.
              */
 
-            self.tilesets.push(self.loadTileset('img/2/tilesheet.png'));
+            for (var i = 0; i < 3; i++)
+                self.tilesets.push(self.loadTileset('img/' + (i + 1) + '/tilesheet.png'));
 
-            if (!self.renderer.mobile && !self.renderer.tablet)
-                self.tilesets.push(self.loadTileset('img/3/tilesheet.png'));
+            self.renderer.setTileset(self.tilesets[self.renderer.getScale() - 1]);
 
             self.tilesetsLoaded = true;
         },
@@ -169,7 +169,7 @@ define(['jquery'], function($) {
         },
 
         isOutOfBounds: function(x, y) {
-            return isInt(x) && isInt(y) && (x < 0 || x >= this.width || y < 0 || y >= this.height);
+            return x < 0 || x >= this.width || y < 0 || y >= this.height;
         },
 
         getX: function(index, width) {

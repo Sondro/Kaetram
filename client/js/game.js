@@ -1,4 +1,4 @@
-/* global Class, log, Packets */
+/* global Class, log, Packets, Modules */
 
 define(['./renderer/renderer', './utils/storage',
         './map/map', './network/socket', './entity/character/player/player',
@@ -91,6 +91,8 @@ define(['./renderer/renderer', './utils/storage',
 
             self.map.onReady(function() {
                 log.info('The map has been loaded!');
+                self.renderer.setMap(self.map);
+
             });
         },
 
@@ -173,6 +175,24 @@ define(['./renderer/renderer', './utils/storage',
             });
         },
 
+        input: function(inputType, data) {
+            var self = this;
+
+            switch (inputType) {
+                case Modules.InputType.Key:
+                    self.renderer.camera.setPosition(4, 0);
+                    break;
+
+                case Modules.InputType.LeftClick:
+
+                    break;
+
+                case Modules.InputType.RightClick:
+
+                    break;
+            }
+        },
+
         handleDisconnection: function() {
             var self = this;
 
@@ -190,10 +210,9 @@ define(['./renderer/renderer', './utils/storage',
         },
 
         resize: function() {
-            var self = this,
-                newScale = self.getScaleFactor();
+            var self = this;
 
-
+            self.renderer.resize();
         },
 
         createPlayer: function() {

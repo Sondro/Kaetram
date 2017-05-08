@@ -34,8 +34,6 @@ module.exports = Player = Character.extend({
     load: function(data) {
         var self = this;
 
-        log.info(data);
-
         self.x = data.x;
         self.y = data.y;
         self.kind = data.kind;
