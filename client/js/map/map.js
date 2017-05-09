@@ -66,7 +66,9 @@ define(['jquery'], function($) {
         },
 
         loadTilesets: function() {
-            var self = this;
+            var self = this,
+                scale = self.renderer.getScale(),
+                isBigScale = scale === 3;
 
             /**
              * The tile-sheet of scale one is never used because
@@ -74,10 +76,14 @@ define(['jquery'], function($) {
              * that neither the entities would be necessary.
              */
 
-            for (var i = 0; i < 3; i++)
-                self.tilesets.push(self.loadTileset('img/' + (i + 1) + '/tilesheet.png'));
+            self.tilesets.push(self.loadTileset('img/2/tilesheet.png'));
 
-            self.renderer.setTileset(self.tilesets[self.renderer.getScale() - 1]);
+            if (isBigScale)
+                self.tilesets.push(self.loadTileset('img/3/tilesheet.png'));
+
+            log.info(self.tilesets);
+
+            self.renderer.setTileset(self.tilesets[isBigScale ? 1 : 0]);
 
             self.tilesetsLoaded = true;
         },
@@ -148,7 +154,7 @@ define(['jquery'], function($) {
         },
 
         gridPositionToIndex: function(x, y) {
-            return y * this.width + x + 1;
+            return (y * this.width) + x + 1;
         },
 
         isColliding: function(x, y) {
@@ -161,7 +167,7 @@ define(['jquery'], function($) {
         },
 
         isHighTile: function(id) {
-            return _.indexOf(this.high, id + 1) >= 0;
+            return this.high.indexOf(id + 1) >= 0;
         },
 
         isAnimatedTile: function(id) {
@@ -169,7 +175,7 @@ define(['jquery'], function($) {
         },
 
         isOutOfBounds: function(x, y) {
-            return x < 0 || x >= this.width || y < 0 || y >= this.height;
+            return isInt(x) && isInt(y) && (x < 0 || x >= this.width || y < 0 || y >= this.height);
         },
 
         getX: function(index, width) {

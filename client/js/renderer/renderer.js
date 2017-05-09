@@ -30,6 +30,9 @@ define(['./camera'], function(Camera) {
             self.tileSize = 16;
             self.fontSize = 10;
 
+            self.screenWidth = 0;
+            self.screenHeight = 0;
+
             self.time = new Date();
 
             self.fps = 0;
@@ -42,29 +45,34 @@ define(['./camera'], function(Camera) {
             var self = this;
 
             self.scale = self.getScale();
-
-            self.loadCamera();
-            self.loadFont();
+            self.drawingScale = self.getDrawingScale();
 
             self.forEachContext(function(context) {
                 context.mozImageSmoothingEnabled = false;
             });
 
-            //self.setBackground();
+            self.loadCamera();
+            self.loadFont();
         },
 
         loadCamera: function() {
             var self = this;
 
-            self.camera = new Camera(self);
+            if (!self.camera)
+                self.camera = new Camera(self);
 
-            var width = self.camera.gridWidth * self.tileSize * self.scale,
-                height = self.camera.gridHeight * self.tileSize * self.scale;
+            self.screenWidth = self.camera.gridWidth * self.tileSize;
+            self.screenHeight = self.camera.gridHeight * self.tileSize;
+
+            var width = self.screenWidth * self.drawingScale,
+                height = self.screenHeight * self.drawingScale;
 
             self.forEachCanvas(function(canvas) {
                 canvas.width = width;
                 canvas.height = height;
             });
+
+            self.camera.load();
         },
 
         loadFont: function() {
@@ -81,17 +89,19 @@ define(['./camera'], function(Camera) {
 
             self.scale = self.getScale();
 
-            self.camera.load();
-            //self.setBackground();
+            self.loadCamera();
         },
 
         render: function() {
             var self = this;
 
-            self.clearText();
+            self.saveAll();
+            self.clearAll();
 
             self.draw();
             self.drawFPS();
+
+            self.restoreAll();
         },
 
         /**
@@ -102,8 +112,12 @@ define(['./camera'], function(Camera) {
             var self = this,
                 tilesetWidth = self.tileset.width / self.map.tileSize;
 
+            self.updateView();
+
             self.forEachVisibleTile(function(id, index) {
-                self.drawTile(self.map.isHighTile(id) ? self.foreContext : self.backContext,
+                var isHighTile = self.map.isHighTile(id);
+
+                self.drawTile(isHighTile ? self.foreContext : self.backContext,
                     id, self.tileset, tilesetWidth, self.map.width, index);
             });
         },
@@ -115,8 +129,8 @@ define(['./camera'], function(Camera) {
                 return;
 
             self.drawScaledImage(context, tileset,
-                self.getX(tileId + 1, (setWidth / self.scale) * self.tileSize),
-                Math.floor(tileId / (setWidth / self.scale) * self.tileSize),
+                self.getX(tileId + 1, (setWidth / self.drawingScale)) * self.tileSize,
+                Math.floor(tileId / (setWidth / self.drawingScale)) * self.tileSize,
                 self.tileSize, self.tileSize,
                 self.getX(cellId + 1, gridWidth) * self.tileSize,
                 Math.floor(cellId / gridWidth) * self.tileSize);
@@ -163,14 +177,14 @@ define(['./camera'], function(Camera) {
                 return;
 
             context.drawImage(image,
-                x * self.scale,
-                y * self.scale,
-                width * self.scale,
-                height * self.scale,
-                dx * self.scale,
-                dy * self.scale,
-                width * self.scale,
-                height * self.scale);
+                x * self.drawingScale,
+                y * self.drawingScale,
+                width * self.drawingScale,
+                height * self.drawingScale,
+                dx * self.drawingScale,
+                dy * self.drawingScale,
+                width * self.drawingScale,
+                height * self.drawingScale);
         },
 
         drawFPS: function() {
@@ -190,46 +204,31 @@ define(['./camera'], function(Camera) {
             self.drawText('FPS: ' + self.realFPS, 10, 11, false, 'white');
         },
 
-        setBackground: function() {
-            var self = this;
-
-            self.forEachCanvas(function(canvas) {
-                canvas.width = 480 * self.scale;
-                canvas.height = 240 * self.scale;
-            });
-
-            self.context.fillStyle = '#12100D';
-            self.context.fillRect(0, 0, 480 * self.scale, 240 * self.scale);
-        },
-
         /**
          * Primordial Rendering functions
          */
 
+        forEachVisibleIndex: function(callback) {
+            var self = this;
+
+            self.camera.forEachVisiblePosition(function(x, y) {
+                if (!self.map.isOutOfBounds(x, y))
+                    callback(self.map.gridPositionToIndex(x, y) - 1);
+            });
+        },
+
         forEachVisibleTile: function(callback) {
-            var self = this,
-                y = self.camera.gridY,
-                maxY = self.camera.gridY + self.camera.gridHeight,
-                x = self.camera.gridX,
-                maxX = self.camera.gridX + self.camera.gridWidth;
+            var self = this;
 
-            for (; y < maxY; y++) {
-                for (; x < maxX; x++) {
-                    if (self.map.isOutOfBounds(x, y))
-                        continue;
+            if (!self.map.mapLoaded)
+                return;
 
-                    var tileIndex = self.map.gridPositionToIndex(x, y) - 1;
-
-                    if (_.isArray(self.map.data[tileIndex]))
-                        _.each(self.map.data[tileIndex], function(id) {
-                            callback(id - 1, tileIndex);
-                        });
-                    else
-                        if (!(isNaN(self.map.data[tileIndex] - 1)))
-                            callback(self.map.data[tileIndex] - 1, tileIndex);
-
-                }
-            }
+            self.forEachVisibleIndex(function(index) {
+                if (_.isArray(self.map.data[index]))
+                    _.each(self.map.data[index], function(id) { callback(id - 1, index); });
+                else if (!(isNaN(self.map.data[index] - 1)))
+                    callback(self.map.data[index] - 1, index);
+            });
         },
 
         isVisiblePosition: function(x, y) {
@@ -241,8 +240,18 @@ define(['./camera'], function(Camera) {
             return this.game.getScaleFactor();
         },
 
+        getDrawingScale: function() {
+            var self = this,
+                scale = self.getScale();
+
+            if (self.mobile)
+                scale = 2;
+
+            return scale;
+        },
+        
         clearText: function() {
-            this.textContext.clearRect(0, 0, 480 * this.scale, 240 * this.scale);
+            this.textContext.clearRect(0, 0, this.screenWidth * this.scale, this.screenHeight * this.scale);
         },
 
         restore: function() {
@@ -255,13 +264,37 @@ define(['./camera'], function(Camera) {
             var self = this;
 
             self.forEachContext(function(context) {
-                context.clearRect(0, 0, 480 * self.scale, 240 * self.scale);
+                context.clearRect(0, 0, self.screenWidth * self.scale, self.screenHeight * self.scale);
+            });
+        },
+
+        saveAll: function() {
+            var self = this;
+
+            self.forEachContext(function(context) {
+                context.save();
+            });
+        },
+
+        restoreAll: function() {
+            var self = this;
+
+            self.forEachContext(function(context) {
+                context.restore();
             });
         },
 
         /**
          * Rendering Functions
          */
+
+        updateView: function() {
+            var self = this;
+
+            self.forEachContext(function(context) {
+                self.setCameraView(context);
+            });
+        },
 
         setCameraView: function(context) {
             context.translate(-this.camera.x * this.scale, -this.camera.y * this.scale);
@@ -270,7 +303,7 @@ define(['./camera'], function(Camera) {
         clearScreen: function(context) {
             var self = this;
 
-            context.clearRect(0, 0, 480 * self.scale, 240 * self.scale);
+            context.clearRect(0, 0, this.screenWidth * self.scale, this.screenHeight * self.scale);
         },
 
         /**

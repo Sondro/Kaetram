@@ -63,7 +63,7 @@ define(['jquery'], function($) {
             });
 
             $(document).keydown(function(e) {
-                if (!self.game.started)
+                if (!self.game || !self.game.started)
                     return;
 
                 var key = e.which;
@@ -257,7 +257,8 @@ define(['jquery'], function($) {
         resize: function() {
             var self = this;
 
-            self.game.resize();
+            if (self.game)
+                self.game.resize();
         },
 
         setGame: function(game) {

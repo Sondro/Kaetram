@@ -13,15 +13,15 @@ define(function() {
            self.gridX = 0;
            self.gridY = 0;
 
-           self.load();
+           self.setGridPosition(50, 90);
        },
 
        load: function() {
             var self = this,
-                factor = self.renderer.getScaleFactor();
+                factor = self.renderer.getScale();
 
             self.gridWidth = 15 * factor;
-            self.gridHeight = 7 * factor;
+            self.gridHeight = 8 * factor;
        },
 
        setPosition: function(x, y) {
@@ -42,6 +42,25 @@ define(function() {
 
             self.x = self.gridX * 16;
             self.y = self.gridY * 16;
+       },
+
+       forEachVisiblePosition: function(callback) {
+           var self = this;
+
+           for(var y = self.gridY - 1, maxY = y + self.gridHeight + 2; y < maxY; y++) {
+               for(var x = self.gridX - 1, maxX = x + self.gridWidth + 2; x < maxX; x++)
+                   callback(x, y);
+           }
+       },
+
+       move: function(newX, newY) {
+           var self = this,
+               oldPos = {
+                   x: self.camera.x,
+                   y: self.camera.y
+               };
+
+
        }
 
    });
