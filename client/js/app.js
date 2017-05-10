@@ -81,22 +81,19 @@ define(['jquery'], function($) {
                 'zoom': zoomFactor,
                 '-moz-transform': 'scale(' + zoomFactor + ')'
             });
+
+            self.zoomFactor = zoomFactor;
         },
 
         fadeMenu: function() {
-            var self = this,
-                onFinish = function() {
-                    self.body.addClass('started');
-                    self.body.removeClass('intro');
-                };
+            var self = this;
 
             self.updateLoader(null);
 
-            log.info('Closing menu');
-
             setTimeout(function() {
                 self.body.addClass('game');
-                onFinish();
+                self.body.addClass('started');
+                self.body.removeClass('intro');
             }, 500);
         },
 

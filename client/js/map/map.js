@@ -81,8 +81,6 @@ define(['jquery'], function($) {
             if (isBigScale)
                 self.tilesets.push(self.loadTileset('img/3/tilesheet.png'));
 
-            log.info(self.tilesets);
-
             self.renderer.setTileset(self.tilesets[isBigScale ? 1 : 0]);
 
             self.tilesetsLoaded = true;

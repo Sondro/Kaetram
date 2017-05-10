@@ -25,9 +25,6 @@ define(['./renderer/renderer', './utils/storage',
             self.started = false;
             self.ready = false;
 
-            self.panningSpeed = 1;
-            self.panningMode = false;
-
             self.time = new Date();
 
             self.loadRenderer();
@@ -39,8 +36,12 @@ define(['./renderer/renderer', './utils/storage',
             var self = this;
 
             self.started = true;
+
             self.app.fadeMenu();
+            self.getCamera().setPlayer(self.player);
             self.tick();
+
+            self.renderer.renderedFrame[0] = -1;
         },
 
         stop: function() {
@@ -58,9 +59,8 @@ define(['./renderer/renderer', './utils/storage',
 
                 self.renderer.render();
 
-                if (!self.stopped) {
+                if (!self.stopped)
                     requestAnimFrame(self.tick.bind(self));
-                }
             }
         },
 
@@ -98,6 +98,7 @@ define(['./renderer/renderer', './utils/storage',
             self.map.onReady(function() {
                 log.info('The map has been loaded!');
                 self.renderer.setMap(self.map);
+                self.renderer.initCamera();
             });
         },
 
@@ -186,52 +187,12 @@ define(['./renderer/renderer', './utils/storage',
             switch (inputType) {
                 case Modules.InputType.Key:
 
-                    log.info(data);
-
-                    if (data === Modules.Keys.V) {
-
-                        self.panningMode = !self.panningMode;
-                        return;
-                    }
-
-                    log.info(self.panningMode);
-
-                    if (!self.panningMode)
-                        return;
-
-                    var gridPos = [self.renderer.camera.x, self.renderer.camera.y];
-
                     switch(data) {
                         case Modules.Keys.Up:
-                            self.renderer.camera.setPosition(gridPos[0], gridPos[1] - self.panningSpeed);
-                            break;
-
                         case Modules.Keys.Down:
-                            self.renderer.camera.setPosition(gridPos[0], gridPos[1] + self.panningSpeed);
-                            break;
-
                         case Modules.Keys.Left:
-                            self.renderer.camera.setPosition(gridPos[0] - self.panningSpeed, gridPos[1]);
-                            break;
-
                         case Modules.Keys.Right:
-                            self.renderer.camera.setPosition(gridPos[0] + self.panningSpeed, gridPos[1]);
-                            break;
-
-                        case Modules.Keys.U:
-                            if (self.panningSpeed >= 10)
-                                return;
-
-                            self.panningSpeed++;
-
-                            break;
-
-                        case Modules.Keys.J:
-
-                            if (self.panningSpeed <= 0)
-                                return;
-
-                            self.panningSpeed--;
+                            self.getCamera().handlePanning(data);
                             break;
                     }
 
@@ -281,6 +242,10 @@ define(['./renderer/renderer', './utils/storage',
 
         getStorage: function() {
             return this.storage;
+        },
+
+        getCamera: function() {
+            return this.renderer.camera;
         },
 
         setRenderer: function(renderer) {

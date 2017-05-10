@@ -10,6 +10,8 @@ Kaetram To-Do List:
 - When game is in a fully playable state, separate client packets from server packets.
 - Add 'extra' to parsing of tiles
 
+- Use underscore for the forEachCanvas and forEachContext in the renderer.
+
 
 Finished:
 

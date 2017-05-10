@@ -21,7 +21,7 @@ define(['../entity'], function(Entity) {
             self.mana = -1;
             self.maxMana = -1;
 
-            self.isMoving = false;
+            self.moving = false;
         },
 
         animate: function(animation, speed, count, onEndCount) {
@@ -63,6 +63,10 @@ define(['../entity'], function(Entity) {
 
         setGridPosition: function(x, y) {
             this._super(x, y);
+        },
+
+        onMove: function(callback) {
+            this.moveCallback = callback;
         }
     });
 
