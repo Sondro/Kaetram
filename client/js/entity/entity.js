@@ -1,3 +1,5 @@
+/* global Modules */
+
 define(function() {
 
     return Class.extend({
@@ -67,6 +69,10 @@ define(function() {
                 return this.animations[name];
 
             return null;
+        },
+
+        isPlayer: function() {
+            return this.kind === Modules.Types.Player;
         }
 
     });

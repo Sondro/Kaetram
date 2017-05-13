@@ -1,3 +1,5 @@
+/* global Modules */
+
 define(['../character'], function(Character) {
 
     return Character.extend({

@@ -107,7 +107,9 @@ define(['./camera', './tile'], function(Camera, Tile) {
 
             self.loadSizes();
 
-            self.camera.update();
+            if (self.camera)
+                self.camera.update();
+
             self.loadFont();
 
             setTimeout(function() {

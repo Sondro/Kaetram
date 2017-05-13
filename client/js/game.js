@@ -1,9 +1,10 @@
 /* global Class, log, Packets, Modules, _ */
 
 define(['./renderer/renderer', './utils/storage',
-        './map/map', './network/socket', './entity/character/player/player', './renderer/updater',
+        './map/map', './network/socket', './entity/character/player/player',
+        './renderer/updater', './controllers/entities',
         './utils/modules', './network/packets'],
-        function(Renderer, LocalStorage, Map, Socket, Player, Updater) {
+        function(Renderer, LocalStorage, Map, Socket, Player, Updater, Entities) {
 
     return Class.extend({
 
@@ -19,6 +20,7 @@ define(['./renderer/renderer', './utils/storage',
             self.renderer = null;
             self.updater = null;
             self.storage = null;
+            self.entities = null;
             self.map = null;
 
             self.player = null;
@@ -86,6 +88,7 @@ define(['./renderer/renderer', './utils/storage',
             self.setStorage(new LocalStorage());
             self.setSocket(new Socket(self));
             self.setMessages(self.socket.messages);
+            self.setEntityController(new Entities(self));
         },
 
         loadMisc: function() {
@@ -105,6 +108,7 @@ define(['./renderer/renderer', './utils/storage',
                 self.renderer.setMap(self.map);
                 self.renderer.loadCamera();
                 self.setUpdater(new Updater(self));
+                self.entities.load();
             });
         },
 
@@ -284,6 +288,11 @@ define(['./renderer/renderer', './utils/storage',
         setUpdater: function(updater) {
             if (!this.updater)
                 this.updater = updater;
+        },
+
+        setEntityController: function(entities) {
+            if (!this.entities)
+                this.entities = entities;
         }
 
     });
