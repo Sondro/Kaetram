@@ -11,6 +11,8 @@ Kaetram To-Do List:
 - Add 'extra' to parsing of tiles
 
 - Use underscore for the forEachCanvas and forEachContext in the renderer.
+- Make animations use every 3rd gridX and gridY whilst panning to delay animation reset.
+- Double animation speed of water and other tiles with more than two frames.
 
 
 Finished:

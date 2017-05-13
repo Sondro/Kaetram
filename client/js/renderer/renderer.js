@@ -1,6 +1,6 @@
 /* global _, log */
 
-define(['./camera'], function(Camera) {
+define(['./camera', './tile'], function(Camera, Tile) {
 
     return Class.extend({
 
@@ -17,7 +17,7 @@ define(['./camera'], function(Camera) {
             self.foreContext = foreground.getContext('2d');
             self.textContext = textCanvas.getContext('2d');
 
-            self.contexts = [self.context, self.backContext, self.foreContext];
+            self.contexts = [self.backContext, self.foreContext];
             self.canvases = [self.background, self.entities, self.foreground, self.textCanvas];
 
             self.game = game;
@@ -38,6 +38,8 @@ define(['./camera'], function(Camera) {
             self.frameCount = 0;
             self.renderedFrame = [0, 0];
 
+            self.animatedTiles = [];
+
             self.load();
         },
 
@@ -56,6 +58,9 @@ define(['./camera'], function(Camera) {
 
         loadSizes: function() {
             var self = this;
+
+            if (!self.camera)
+                return;
 
             self.screenWidth = self.camera.gridWidth * self.tileSize;
             self.screenHeight = self.camera.gridHeight * self.tileSize;
@@ -76,6 +81,20 @@ define(['./camera'], function(Camera) {
                 self.fontSize = 20;
 
             self.textContext.font = self.fontSize + 'px AdvoCut';
+        },
+
+        loadCamera: function() {
+            var self = this;
+
+            self.camera = new Camera(this);
+
+            self.loadSizes();
+
+            self.camera.onGridChange(function() {
+                self.updateAnimatedTiles();
+            });
+
+            self.updateAnimatedTiles();
         },
 
         resize: function() {
@@ -99,12 +118,25 @@ define(['./camera'], function(Camera) {
         render: function() {
             var self = this;
 
+            self.clearScreen(self.context);
+            self.context.save();
+
             self.saveAll();
 
+            /**
+             * Rendering related draws
+             */
+
             self.draw();
+            self.drawAnimatedTiles();
+
+            /**
+             * Text related draws
+             */
             self.drawFPS();
 
             self.restoreAll();
+            self.context.restore();
         },
 
         /**
@@ -117,21 +149,59 @@ define(['./camera'], function(Camera) {
             if (self.hasRenderedFrame())
                 return;
 
-            var tilesetWidth = self.tileset.width / self.map.tileSize;
-
             self.clearAll();
-
             self.updateView();
 
             self.forEachVisibleTile(function(id, index) {
-                var isHighTile = self.map.isHighTile(id);
+                var isHighTile = self.map.isHighTile(id),
+                    context = isHighTile ? self.foreContext : self.backContext;
 
-                self.drawTile(isHighTile ? self.foreContext : self.backContext,
-                    id, self.tileset, tilesetWidth, self.map.width, index);
+                if (!self.map.isAnimatedTile(id))
+                    self.drawTile(context, id, self.tileset, self.tileset.width / self.tileSize, self.map.width, index);
+
             });
 
             self.saveFrame();
         },
+
+        drawAnimatedTiles: function() {
+            var self = this;
+
+            self.setCameraView(self.context);
+
+            self.forEachAnimatedTile(function(tile) {
+                self.drawTile(self.context, tile.id, self.tileset, self.tileset.width / self.tileSize, self.map.width, tile.index);
+                tile.loaded = true;
+            });
+        },
+
+        redrawTile: function(tile) {
+            var self = this;
+
+            self.clearTile(self.context, self.map.width, tile.index);
+            self.drawTile(self.context, tile.id, self.tileset, self.tileset.width / self.tileSize, self.map.width, tile.index);
+        },
+
+        drawFPS: function() {
+            var self = this,
+                currentTime = new Date(),
+                timeDiff = currentTime - self.time;
+
+            if (timeDiff >= 1000) {
+                self.realFPS = self.frameCount;
+                self.frameCount = 0;
+                self.time = currentTime;
+                self.fps = self.realFPS;
+            }
+
+            self.frameCount++;
+
+            self.drawText('FPS: ' + self.realFPS, 10, 11, false, 'white');
+        },
+
+        /**
+         * Primitive drawing functions
+         */
 
         drawTile: function(context, tileId, tileset, setWidth, gridWidth, cellId) {
             var self = this;
@@ -149,8 +219,8 @@ define(['./camera'], function(Camera) {
 
         clearTile: function(context, gridWidth, cellId) {
             var self = this,
-                x = self.getX(cellId + 1, gridWidth) * self.tileSize * self.scale,
-                y = Math.floor(cellId / gridWidth) * self.tileSize * self.scale,
+                x = self.getX(cellId + 1, gridWidth) * self.tileSize * self.drawingScale,
+                y = Math.floor(cellId / gridWidth) * self.tileSize * self.drawingScale,
                 w = self.tileSize * self.scale;
 
             context.clearRect(x, y, w, w);
@@ -196,23 +266,6 @@ define(['./camera'], function(Camera) {
                 height * self.drawingScale);
         },
 
-        drawFPS: function() {
-            var self = this,
-                currentTime = new Date(),
-                timeDiff = currentTime - self.time;
-
-            if (timeDiff >= 1000) {
-                self.realFPS = self.frameCount;
-                self.frameCount = 0;
-                self.time = currentTime;
-                self.fps = self.realFPS;
-            }
-
-            self.frameCount++;
-
-            self.drawText('FPS: ' + self.realFPS, 10, 11, false, 'white');
-        },
-
         /**
          * Primordial Rendering functions
          */
@@ -240,6 +293,12 @@ define(['./camera'], function(Camera) {
             });
         },
 
+        forEachAnimatedTile: function(callback) {
+            _.each(this.animatedTiles, function(tile) {
+                callback(tile);
+            });
+        },
+
         isVisiblePosition: function(x, y) {
             return y >= this.camera.gridY && y < this.camera.gridY + this.camera.gridHeight &&
                     x >= this.camera.gridX && x < this.camera.gridX + this.camera.gridWidth
@@ -257,6 +316,10 @@ define(['./camera'], function(Camera) {
                 scale = 2;
 
             return scale;
+        },
+
+        clearContext: function() {
+            this.context.clearRect(0, 0, this.screenWidth * this.scale, this.screenHeight * this.scale);
         },
         
         clearText: function() {
@@ -306,13 +369,11 @@ define(['./camera'], function(Camera) {
         },
 
         setCameraView: function(context) {
-            context.translate(-this.camera.x * this.getDrawingScale(), -this.camera.y * this.getDrawingScale());
+            context.translate(-this.camera.x * this.drawingScale, -this.camera.y * this.drawingScale);
         },
 
         clearScreen: function(context) {
-            var self = this;
-
-            context.clearRect(0, 0, this.screenWidth * self.scale, this.screenHeight * self.scale);
+            context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height);
         },
 
         hasRenderedFrame: function() {
@@ -322,8 +383,10 @@ define(['./camera'], function(Camera) {
         saveFrame: function() {
             var self = this;
 
-            self.renderedFrame[0] = self.camera.x;
-            self.renderedFrame[1] = self.camera.y;
+            if (!self.hasRenderedFrame()) {
+                self.renderedFrame[0] = self.camera.x;
+                self.renderedFrame[1] = self.camera.y;
+            }
         },
 
         /**
@@ -372,11 +435,40 @@ define(['./camera'], function(Camera) {
             this.map = map;
         },
 
-        initCamera: function() {
-            var self = this;
+        updateAnimatedTiles: function() {
+            var self = this,
+                newTiles = [];
 
-            self.camera = new Camera(this);
-            self.loadSizes();
+            self.forEachVisibleTile(function(id, index) {
+                /**
+                 * We don't want to reinitialize animated tiles that already exist
+                 * and are within the visible camera proportions. This way we can parse
+                 * it every time the tile moves slightly.
+                 */
+
+                if (!self.map.isAnimatedTile(id))
+                    return;
+
+                /**
+                 * Push the pre-existing tiles.
+                 */
+
+                var tileIndex = self.animatedTiles.indexOf(id);
+
+                if (tileIndex > -1) {
+                    newTiles.push(self.animatedTiles[tileIndex]);
+                    return;
+                }
+
+                var tile = new Tile(id, index, self.map.getTileAnimationLength(id), self.map.getTileAnimationDelay(id)),
+                    position = self.map.indexToGridPosition(tile.index);
+
+                tile.setPosition(position);
+
+                newTiles.push(tile);
+            });
+
+            self.animatedTiles = newTiles;
         },
 
         /**
@@ -385,7 +477,25 @@ define(['./camera'], function(Camera) {
 
         getZoom: function() {
             return this.game.app.zoomFactor;
+        },
+
+        getTileBounds: function(tile) {
+            var self = this,
+                bounds = {},
+                cellId = tile.index;
+
+            bounds.x = (self.getX(cellId + 1, self.map.width) * self.tileSize - self.camera.x) * self.drawingScale;
+            bounds.y = ((Math.floor(cellId / self.map.width) * self.tileSize) - self.camera.y) * self.drawingScale;
+            bounds.width = self.tileSize * self.drawingScale;
+            bounds.height = self.tileSize * self.drawingScale;
+            bounds.left = bounds.x;
+            bounds.right = bounds.x + bounds.width;
+            bounds.top = bounds.y;
+            bounds.bottom = bounds.y + bounds.height;
+
+            return bounds;
         }
+
     });
 
 });

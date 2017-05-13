@@ -42,6 +42,7 @@ function Main() {
             connection.sendUTF8('full');
             connection.close();
         }
+
     });
 
     webSocket.onRequestStatus(function() {

@@ -15,6 +15,9 @@ define(function() {
             self.gridX = 0;
             self.gridY = 0;
 
+            self.prevGridX = 0;
+            self.prevGridY = 0;
+
             self.speed = 1;
             self.panning = false;
 
@@ -37,19 +40,30 @@ define(function() {
             self.x = x;
             self.y = y;
 
+            self.prevGridX = self.gridX;
+            self.prevGridY = self.gridY;
+
             self.gridX = Math.floor(x / 16);
             self.gridY = Math.floor(y / 16);
 
+            if (self.gridCallback && (self.prevGridX !== self.gridX || self.prevGridY !== self.gridY))
+                self.gridCallback();
         },
 
         setGridPosition: function(x, y) {
             var self = this;
+
+            self.prevGridX = self.gridX;
+            self.prevGridY = self.gridY;
 
             self.gridX = x;
             self.gridY = y;
 
             self.x = self.gridX * 16;
             self.y = self.gridY * 16;
+
+            if (self.gridCallback && (self.prevGridX !== self.gridX || self.prevGridY !== self.gridY))
+                self.gridCallback();
         },
 
         loadCallbacks: function() {
@@ -100,6 +114,10 @@ define(function() {
                 for(var x = self.gridX - 1, maxX = x + self.gridWidth + 2; x < maxX; x++)
                     callback(x, y);
             }
+        },
+
+        onGridChange: function(callback) {
+            this.gridCallback = callback;
         }
 
     });

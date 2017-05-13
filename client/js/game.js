@@ -1,8 +1,9 @@
 /* global Class, log, Packets, Modules, _ */
 
 define(['./renderer/renderer', './utils/storage',
-        './map/map', './network/socket', './entity/character/player/player',
-        './utils/modules', './network/packets'], function(Renderer, LocalStorage, Map, Socket, Player) {
+        './map/map', './network/socket', './entity/character/player/player', './renderer/updater',
+        './utils/modules', './network/packets'],
+        function(Renderer, LocalStorage, Map, Socket, Player, Updater) {
 
     return Class.extend({
 
@@ -16,6 +17,7 @@ define(['./renderer/renderer', './utils/storage',
             self.socket = null;
             self.messages = null;
             self.renderer = null;
+            self.updater = null;
             self.storage = null;
             self.map = null;
 
@@ -57,7 +59,10 @@ define(['./renderer/renderer', './utils/storage',
 
             if (self.ready) {
 
+                self.time = new Date().getTime();
+
                 self.renderer.render();
+                self.updater.update();
 
                 if (!self.stopped)
                     requestAnimFrame(self.tick.bind(self));
@@ -98,7 +103,8 @@ define(['./renderer/renderer', './utils/storage',
             self.map.onReady(function() {
                 log.info('The map has been loaded!');
                 self.renderer.setMap(self.map);
-                self.renderer.initCamera();
+                self.renderer.loadCamera();
+                self.setUpdater(new Updater(self));
             });
         },
 
@@ -194,6 +200,13 @@ define(['./renderer/renderer', './utils/storage',
                         case Modules.Keys.Right:
                             self.getCamera().handlePanning(data);
                             break;
+
+                        case Modules.Keys.J:
+                            log.info('Animated Tiles: ' + self.renderer.animatedTiles);
+                            self.renderer.forEachAnimatedTile(function(tile) {
+                                log.info('Tile: ' + tile.getPosition());
+                            });
+                            break;
                     }
 
                     break;
@@ -266,6 +279,11 @@ define(['./renderer/renderer', './utils/storage',
         setMessages: function(messages) {
             if (!this.messages)
                 this.messages = messages;
+        },
+
+        setUpdater: function(updater) {
+            if (!this.updater)
+                this.updater = updater;
         }
 
     });
