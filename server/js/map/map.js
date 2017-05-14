@@ -114,7 +114,7 @@ module.exports = Map = cls.Class.extend({
 
     loadCollisions: function() {
         var self = this,
-            location = './server/data/map/collisions.json';
+            location = '../data/map/collisions.json';
 
         self.grid = null;
 
